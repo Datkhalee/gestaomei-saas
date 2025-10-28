@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -37,9 +36,11 @@ export default function Sidebar({ onClose }: SidebarProps) {
     <div className="bg-white h-full shadow-lg border-r border-gray-200 flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-blue-600" style={{ fontFamily: '"Pacifico", serif' }}>
-          GestãoMEI
-        </h1>
+        <img 
+          src="/logo.png" 
+          alt="FinanceMEI" 
+          className="h-10"
+        />
         {onClose && (
           <button
             onClick={onClose}
@@ -78,7 +79,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           onClick={handleSignOut}
           className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer whitespace-nowrap"
         >
-          <i className="ri-logout-circle-line mr-3 text-lg"></i>
+          <i className="ri-logout-box-line mr-3 text-lg"></i>
           Sair
         </button>
       </div>
