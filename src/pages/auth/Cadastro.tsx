@@ -53,7 +53,7 @@ export default function Cadastro() {
         <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
           <div className="text-center mb-8">
             <img 
-              src="/logo.png" 
+              src="/logo-finance.png" 
               alt="FinanceMEI" 
               className="h-12 mx-auto mb-4"
             />
