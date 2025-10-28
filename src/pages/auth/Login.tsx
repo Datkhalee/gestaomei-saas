@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
@@ -30,9 +30,11 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2" style={{ fontFamily: '"Pacifico", serif' }}>
-            FinanceMEI
-          </h1>
+          <img 
+            src="/logo.png" 
+            alt="FinanceMEI" 
+            className="h-12 mx-auto mb-4"
+          />
           <p className="text-gray-600">Entre na sua conta</p>
         </div>
 
@@ -61,15 +63,24 @@ export default function Login() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Senha
             </label>
-            <input
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              placeholder="••••••••"
-              required
-              minLength={8}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                placeholder="••••••••"
+                required
+                minLength={8}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <i className={`${showPassword ? 'ri-eye-off-line' : 'ri-eye-line'} text-xl`}></i>
+              </button>
+            </div>
           </div>
 
           <div className="text-right">
