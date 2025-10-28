@@ -1,5 +1,6 @@
-
 import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 
 interface NovaReceitaModalProps {
   isOpen: boolean;
@@ -12,20 +13,20 @@ interface FormData {
   valor: string;
   data: string;
   categoria: string;
-  observacoes: string;
-  status: string;
+  recebido: boolean;
   data_recebimento: string;
 }
 
 const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const { user } = useAuth(); // ✅ USAR O CONTEXTO CORRETO
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState<FormData>({
     descricao: '',
     valor: '',
-    data: '',
-    categoria: 'Vendas',
-    observacoes: '',
-    status: 'Pendente',
+    data: new Date().toISOString().split('T')[0],
+    categoria: 'Venda Produtos',
+    recebido: false,
     data_recebimento: ''
   });
 
@@ -33,72 +34,84 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    if (!user) {
+      setError('Usuário não autenticado');
+      return;
+    }
+
+    if (!formData.descricao.trim()) {
+      setError('Descrição é obrigatória');
+      return;
+    }
+
+    if (!formData.valor || parseFloat(formData.valor) <= 0) {
+      setError('Valor deve ser maior que zero');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { supabase } = await import('../../lib/supabase');
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        alert('Usuário não autenticado');
-        return;
-      }
-
-      // Preparar dados para inserção
-      const insertData: any = {
+      const insertData = {
         user_id: user.id,
-        descricao: formData.descricao,
+        descricao: formData.descricao.trim(),
         valor: parseFloat(formData.valor),
         data: formData.data,
         categoria: formData.categoria,
-        status: formData.status,
-        observacoes: formData.observacoes || null
+        recebido: formData.recebido,
+        data_recebimento: formData.recebido ? formData.data_recebimento : null
       };
 
-      // Adicionar data_recebimento apenas se status for 'Recebido' e data estiver preenchida
-      if (formData.status === 'Recebido' && formData.data_recebimento) {
-        insertData.data_recebimento = formData.data_recebimento;
-      }
-
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('receitas')
         .insert([insertData]);
 
-      if (error) {
-        throw error;
+      if (insertError) {
+        console.error('❌ Erro ao inserir receita:', insertError);
+        throw insertError;
       }
 
       // Reset form
       setFormData({
         descricao: '',
         valor: '',
-        data: '',
-        categoria: 'Vendas',
-        observacoes: '',
-        status: 'Pendente',
+        data: new Date().toISOString().split('T')[0],
+        categoria: 'Venda Produtos',
+        recebido: false,
         data_recebimento: ''
       });
 
       onSuccess();
       onClose();
-    } catch (error) {
-      console.error('Erro ao salvar receita:', error);
-      alert('Erro ao salvar receita. Tente novamente.');
+    } catch (error: any) {
+      console.error('❌ Erro ao salvar receita:', error);
+      setError(error.message || 'Erro ao salvar receita. Tente novamente.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({
+        ...prev,
+        [name]: checked
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Nova Receita</h2>
@@ -109,6 +122,12 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
             <i className="ri-close-line text-xl"></i>
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -121,14 +140,15 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
               value={formData.descricao}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Ex: Venda de produto"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Valor *
+              Valor (R$) *
             </label>
             <input
               type="number"
@@ -136,9 +156,10 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
               value={formData.valor}
               onChange={handleChange}
               required
+              disabled={loading}
               step="0.01"
-              min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              min="0.01"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="0,00"
             />
           </div>
@@ -153,7 +174,8 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
               value={formData.data}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
@@ -166,72 +188,60 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
               value={formData.categoria}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              <option value="Vendas">Vendas</option>
-              <option value="Serviços">Serviços</option>
-              <option value="Consultoria">Consultoria</option>
-              <option value="Outros">Outros</option>
+              <option value="Venda Produtos">Venda Produtos</option>
+              <option value="Prestação Serviços">Prestação Serviços</option>
+              <option value="Outras">Outras</option>
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status *
-            </label>
-            <select
-              name="status"
-              value={formData.status}
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="recebido"
+              name="recebido"
+              checked={formData.recebido}
               onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Pendente">Pendente</option>
-              <option value="Recebido">Recebido</option>
-            </select>
+              disabled={loading}
+              className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
+            />
+            <label htmlFor="recebido" className="text-sm font-medium text-gray-700 cursor-pointer">
+              Já foi recebido?
+            </label>
           </div>
 
-          {formData.status === 'Recebido' && (
+          {formData.recebido && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Data de Recebimento
+                Data de Recebimento *
               </label>
               <input
                 type="date"
                 name="data_recebimento"
                 value={formData.data_recebimento}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required={formData.recebido}
+                disabled={loading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
           )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Observações
-            </label>
-            <textarea
-              name="observacoes"
-              value={formData.observacoes}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Observações adicionais..."
-            />
-          </div>
 
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              disabled={loading}
+              className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
             >
               {loading ? 'Salvando...' : 'Salvar'}
             </button>
