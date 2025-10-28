@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Configuração do Supabase com logs detalhados
@@ -42,7 +41,7 @@ export const testSupabaseConnection = async () => {
 
     // Usar uma query mais simples e segura
     const { error } = await supabaseInstance
-      .from('users_app')
+      .from('profiles')
       .select('id')
       .limit(1)
       .maybeSingle();
