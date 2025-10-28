@@ -37,7 +37,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
       {/* Logo */}
       <div className="p-6 border-b border-gray-200 flex items-center justify-between">
         <img 
-          src="/logo.png" 
+          src="/logo-finance.png" 
           alt="FinanceMEI" 
           className="h-10"
         />
