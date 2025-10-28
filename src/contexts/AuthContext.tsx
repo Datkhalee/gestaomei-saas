@@ -1,5 +1,21 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase, User } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
+
+interface Profile {
+  id: string;
+  nome: string;
+  trial_inicio: string;
+  trial_expira_em: string;
+  status_assinatura: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  profile: Profile | null;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -12,89 +28,75 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const safeSetItem = (key: string, value: string) => {
-  try {
-    localStorage.setItem(key, value);
-    return true;
-  } catch (error) {
-    console.warn('⚠️ localStorage não disponível, usando sessionStorage');
-    try {
-      sessionStorage.setItem(key, value);
-      return true;
-    } catch (e) {
-      console.error('❌ Erro ao salvar dados:', e);
-      return false;
-    }
-  }
-};
-
-const safeGetItem = (key: string): string | null => {
-  try {
-    return localStorage.getItem(key);
-  } catch (error) {
-    try {
-      return sessionStorage.getItem(key);
-    } catch (e) {
-      return null;
-    }
-  }
-};
-
-const safeRemoveItem = (key: string) => {
-  try {
-    localStorage.removeItem(key);
-  } catch (error) {
-    try {
-      sessionStorage.removeItem(key);
-    } catch (e) {
-      console.error('❌ Erro ao remover dados:', e);
-    }
-  }
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkUser();
+
+    // Listener para mudanças de autenticação
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        await loadUserProfile(session.user.id, session.user.email!);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
+
+  const loadUserProfile = async (userId: string, email: string) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Erro ao carregar perfil:', error);
+        setUser({ id: userId, email, profile: null });
+        return;
+      }
+
+      setUser({ id: userId, email, profile });
+    } catch (error) {
+      console.error('Erro ao carregar perfil:', error);
+      setUser({ id: userId, email, profile: null });
+    }
+  };
 
   const checkUser = async () => {
     try {
       setLoading(true);
-      const authUser = safeGetItem('financemei_user');
-      
-      if (authUser) {
-        const userData = JSON.parse(authUser);
-        
-        if (!supabase) {
-          console.error('❌ Supabase não configurado');
-          setUser(null);
-          setLoading(false);
-          return;
-        }
 
-        const { data, error } = await supabase
-          .from('users_app')
-          .select('*')
-          .eq('email', userData.email)
-          .eq('senha', userData.senha)
-          .maybeSingle();
+      if (!supabase) {
+        console.error('Supabase não configurado');
+        setUser(null);
+        setLoading(false);
+        return;
+      }
 
-        if (data && !error) {
-          setUser(data);
-        } else {
-          console.warn('⚠️ Usuário não encontrado ou erro na consulta:', error);
-          safeRemoveItem('financemei_user');
-          setUser(null);
-        }
+      const { data: { session }, error } = await supabase.auth.getSession();
+
+      if (error) {
+        console.error('Erro ao verificar sessão:', error);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      if (session?.user) {
+        await loadUserProfile(session.user.id, session.user.email!);
       } else {
         setUser(null);
       }
     } catch (error) {
-      console.error('❌ Erro ao verificar usuário:', error);
-      safeRemoveItem('financemei_user');
+      console.error('Erro ao verificar usuário:', error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -104,67 +106,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (nome: string, email: string, senha: string) => {
     try {
       setLoading(true);
-      
+
       if (!supabase) {
         throw new Error('Erro de configuração. Tente novamente mais tarde.');
       }
 
-      const { data: existingUser, error: checkError } = await supabase
-        .from('users_app')
-        .select('email')
-        .eq('email', email)
-        .maybeSingle();
+      // Criar usuário no Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password: senha,
+        options: {
+          data: {
+            nome: nome
+          }
+        }
+      });
 
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('❌ Erro ao verificar email:', checkError);
-        throw new Error('Erro ao verificar email. Tente novamente.');
-      }
+      if (authError) {
+        console.error('Erro ao criar usuário:', authError);
 
-      if (existingUser) {
-        throw new Error('Este email já está cadastrado');
-      }
-
-      const now = new Date();
-      const trialExpiration = new Date();
-      trialExpiration.setDate(trialExpiration.getDate() + 2);
-
-      const { data: newUser, error: userError } = await supabase
-        .from('users_app')
-        .insert({
-          nome,
-          email,
-          senha,
-          trial_inicio: now.toISOString(),
-          trial_expira_em: trialExpiration.toISOString(),
-          status_assinatura: 'trial',
-          created_at: now.toISOString(),
-          updated_at: now.toISOString()
-        })
-        .select()
-        .single();
-
-      if (userError) {
-        console.error('❌ Erro ao criar usuário:', userError);
-        
-        if (userError.code === '23505') {
+        if (authError.message.includes('already registered')) {
           throw new Error('Este email já está cadastrado');
         }
-        
-        if (userError.message.includes('permission denied') || userError.message.includes('RLS')) {
-          throw new Error('Erro de permissão. Entre em contato com o suporte.');
-        }
-        
+
         throw new Error('Erro ao criar conta. Tente novamente.');
       }
 
-      if (newUser) {
-        setUser(newUser);
-        safeSetItem('financemei_user', JSON.stringify({ email, senha }));
-      } else {
+      if (!authData.user) {
         throw new Error('Erro ao criar conta. Nenhum dado retornado.');
       }
+
+      // Aguardar um pouco para garantir que o trigger criou o profile
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Carregar perfil
+      await loadUserProfile(authData.user.id, authData.user.email!);
+
     } catch (error: any) {
-      console.error('❌ Erro no cadastro:', error);
+      console.error('Erro no cadastro:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -174,42 +153,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, senha: string) => {
     try {
       setLoading(true);
-      
+
       if (!supabase) {
         throw new Error('Erro de configuração. Tente novamente mais tarde.');
       }
 
-      const { data, error } = await supabase
-        .from('users_app')
-        .select('*')
-        .eq('email', email)
-        .eq('senha', senha)
-        .maybeSingle();
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password: senha
+      });
 
-      if (error) {
-        console.error('❌ Erro no login:', error);
-        
-        if (error.code === 'PGRST116') {
+      if (authError) {
+        console.error('Erro no login:', authError);
+
+        if (authError.message.includes('Invalid login credentials')) {
           throw new Error('Email ou senha inválidos');
         }
-        
+
         throw new Error('Erro ao fazer login. Verifique sua conexão.');
       }
 
-      if (!data) {
+      if (!authData.user) {
         throw new Error('Email ou senha inválidos');
       }
 
-      safeSetItem('financemei_user', JSON.stringify({ email, senha }));
-      setUser(data);
+      await loadUserProfile(authData.user.id, authData.user.email!);
+
     } catch (error: any) {
-      console.error('❌ Erro no login:', error);
-      
-      if (error.message.includes('Email ou senha inválidos')) {
-        throw error;
-      }
-      
-      throw new Error('Email ou senha inválidos');
+      console.error('Erro no login:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -217,27 +189,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      safeRemoveItem('financemei_user');
+      if (!supabase) return;
+
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error('Erro ao fazer logout:', error);
+      }
+
       setUser(null);
     } catch (error) {
-      console.error('❌ Erro ao fazer logout:', error);
+      console.error('Erro ao fazer logout:', error);
     }
   };
 
   const updateUser = async () => {
     if (user && supabase) {
       try {
-        const { data } = await supabase
-          .from('users_app')
+        const { data: profile } = await supabase
+          .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .maybeSingle();
+          .single();
 
-        if (data) {
-          setUser(data);
+        if (profile) {
+          setUser({ ...user, profile });
         }
       } catch (error) {
-        console.error('❌ Erro ao atualizar usuário:', error);
+        console.error('Erro ao atualizar usuário:', error);
       }
     }
   };
