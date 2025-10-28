@@ -1,8 +1,9 @@
-
 import { ReactNode, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTrialStatus } from '../hooks/useTrialStatus';
 import Sidebar from '../components/layout/Sidebar';
+import TrialBlocker from '../components/layout/TrialBlocker';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -10,18 +11,22 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
+  const { isExpired } = useTrialStatus();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/login');
+      return;
     }
 
-    if (user && user.status_assinatura === 'expirado') {
+    // Se trial expirou e não está na página de planos, redireciona
+    if (user && isExpired && location.pathname !== '/meu-plano') {
       navigate('/meu-plano');
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isExpired, location.pathname, navigate]);
 
   if (loading) {
     return (
@@ -37,6 +42,9 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Bloqueio de Trial Expirado - só aparece se não estiver na página de planos */}
+      {isExpired && location.pathname !== '/meu-plano' && <TrialBlocker />}
+
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
