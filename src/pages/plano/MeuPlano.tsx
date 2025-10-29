@@ -1,23 +1,9 @@
 import { useAuth } from '../../contexts/AuthContext';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useEffect } from 'react';
 
 export default function MeuPlano() {
   const { user } = useAuth();
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.fbq && user) {
-      if (user.status_assinatura === 'trial' || user.status_assinatura === 'expired') {
-        window.fbq('track', 'InitiateCheckout', {
-          content_name: 'Plano Full FinanceMEI',
-          content_category: 'Subscription',
-          value: 27.00,
-          currency: 'BRL'
-        });
-      }
-    }
-  }, [user]);
 
   if (!user) return null;
 
@@ -42,16 +28,6 @@ export default function MeuPlano() {
   const proximaCobranca = user.data_ultima_cobranca 
     ? new Date(new Date(user.data_ultima_cobranca).getTime() + 30 * 24 * 60 * 60 * 1000)
     : null;
-
-  const handleCheckoutClick = () => {
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'AddToCart', {
-        content_name: 'Clique Checkout FinanceMEI',
-        value: 27.00,
-        currency: 'BRL'
-      });
-    }
-  };
 
   const getStatusCard = () => {
     if (isTrial) {
@@ -184,13 +160,11 @@ export default function MeuPlano() {
       return (
         
           href="https://pay.cakto.com.br/38pmmdm_618893"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={handleCheckoutClick}
-          className={baseClasses + " " + (isExpirado 
-            ? 'bg-red-600 hover:bg-red-700 text-white' 
-            : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
-          )}
+          className={`${baseClasses} ${
+            isExpirado 
+              ? 'bg-red-600 hover:bg-red-700 text-white' 
+              : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
+          }`}
         >
           <i className="ri-vip-crown-line text-xl"></i>
           {isExpirado ? 'REATIVAR AGORA' : 'ASSINAR AGORA'}
@@ -202,9 +176,7 @@ export default function MeuPlano() {
       return (
         
           href="https://pay.cakto.com.br/38pmmdm_618893"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={baseClasses + " bg-gray-600 hover:bg-gray-700 text-white"}
+          className={`${baseClasses} bg-gray-600 hover:bg-gray-700 text-white`}
         >
           <i className="ri-settings-3-line text-xl"></i>
           Gerenciar Assinatura
@@ -216,10 +188,7 @@ export default function MeuPlano() {
       return (
         
           href="https://pay.cakto.com.br/38pmmdm_618893"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={handleCheckoutClick}
-          className={baseClasses + " bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"}
+          className={`${baseClasses} bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white`}
         >
           <i className="ri-restart-line text-xl"></i>
           Reativar Assinatura
