@@ -66,9 +66,20 @@ export default function Sucesso() {
         return;
       }
 
+      // 🎯 EVENTO FACEBOOK PIXEL - PURCHASE
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'Purchase', {
+          content_name: 'Plano Full FinanceMEI',
+          content_type: 'subscription',
+          value: 27.00,
+          currency: 'BRL',
+          user_email: email
+        });
+      }
+
       setMessage('🎉 Plano FULL ativado! Redirecionando...');
       
-      // 🆕 ATUALIZAR AUTHCONTEXT
+      // ATUALIZAR AUTHCONTEXT
       await updateUser();
       
       setTimeout(() => {
