@@ -302,17 +302,17 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando dashboard...</p>
+          <p className="text-gray-600">Carregando dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 lg:pb-8 transition-colors duration-200">
+    <div className="min-h-screen bg-gray-50 pb-20 lg:pb-8">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
         
         {/* Status Badge Discreto - Topo */}
@@ -320,7 +320,7 @@ export default function Dashboard() {
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 transition-all duration-200"
             title={darkMode ? 'Modo Claro' : 'Modo Escuro'}
           >
             {darkMode ? (
@@ -863,14 +863,14 @@ export default function Dashboard() {
       `}</style>
 
       {/* Rodapé */}
-      <footer className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+      <footer className="mt-8 pt-6 border-t border-gray-200 text-center">
+        <p className="text-sm text-gray-600">
           © {new Date().getFullYear()} SaaS desenvolvido por{' '}
           <a 
             href="https://viniciusclemente.com.br" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+            className="font-semibold text-blue-600 hover:underline"
           >
             Vinicius Clemente
           </a>
