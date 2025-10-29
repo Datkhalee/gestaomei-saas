@@ -1,9 +1,24 @@
 import { useAuth } from '../../contexts/AuthContext';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useEffect } from 'react';
 
 export default function MeuPlano() {
   const { user } = useAuth();
+
+  // 🎯 EVENTO INITIATE CHECKOUT - Ao acessar página
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.fbq && user) {
+      if (user.status_assinatura === 'trial' || user.status_assinatura === 'expired') {
+        window.fbq('track', 'InitiateCheckout', {
+          content_name: 'Plano Full FinanceMEI',
+          content_category: 'Subscription',
+          value: 27.00,
+          currency: 'BRL'
+        });
+      }
+    }
+  }, [user]);
 
   if (!user) return null;
 
@@ -28,6 +43,18 @@ export default function MeuPlano() {
   const proximaCobranca = user.data_ultima_cobranca 
     ? new Date(new Date(user.data_ultima_cobranca).getTime() + 30 * 24 * 60 * 60 * 1000)
     : null;
+
+  // 🎯 EVENTO ADD TO CART - Ao clicar em assinar
+  const handleCheckoutClick = () => {
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'AddToCart', {
+        content_name: 'Clique Checkout FinanceMEI',
+        content_category: 'Checkout Interest',
+        value: 27.00,
+        currency: 'BRL'
+      });
+    }
+  };
 
   const getStatusCard = () => {
     if (isTrial) {
@@ -158,10 +185,11 @@ export default function MeuPlano() {
     
     if (isTrial || isExpirado) {
       return (
-        <a
+        
           href="https://pay.cakto.com.br/38pmmdm_618893"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleCheckoutClick}
           className={`${baseClasses} ${
             isExpirado 
               ? 'bg-red-600 hover:bg-red-700 text-white' 
@@ -176,7 +204,7 @@ export default function MeuPlano() {
 
     if (isAtivo) {
       return (
-        <a
+        
           href="https://pay.cakto.com.br/38pmmdm_618893"
           target="_blank"
           rel="noopener noreferrer"
@@ -190,10 +218,11 @@ export default function MeuPlano() {
 
     if (isCancelado) {
       return (
-        <a
+        
           href="https://pay.cakto.com.br/38pmmdm_618893"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleCheckoutClick}
           className={`${baseClasses} bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white`}
         >
           <i className="ri-restart-line text-xl"></i>
