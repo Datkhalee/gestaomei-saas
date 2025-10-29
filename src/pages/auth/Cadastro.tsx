@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import WelcomeModal from '../../components/modals/WelcomeModal';
+import WhatsAppButton from '../../components/layout/WhatsAppButton';
 
 export default function Cadastro() {
   const [nome, setNome] = useState('');
@@ -50,6 +51,7 @@ export default function Cadastro() {
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+        <WhatsAppButton />
         <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
           <div className="text-center mb-8">
             <img 
