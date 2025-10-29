@@ -71,7 +71,12 @@ export default function Cadastro() {
               alt="FinanceMEI" 
               className="h-12 mx-auto mb-4"
             />
-            <p className="text-gray-600">Crie sua conta e ganhe 2 dias grátis</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Teste o FinanceMEI Gratuitamente
+            </h1>
+            <p className="text-gray-600">
+              Organize suas finanças como MEI sem compromisso
+            </p>
           </div>
 
           {error && (
@@ -160,18 +165,36 @@ export default function Cadastro() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap shadow-lg transform hover:scale-105"
             >
-              {loading ? 'Criando conta...' : 'Criar Conta Grátis'}
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Criando conta...
+                </div>
+              ) : (
+                '🚀 Começar Teste Grátis'
+              )}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Já tem uma conta?{' '}
-              <Link to="/login" className="text-blue-600 font-semibold hover:text-blue-700 cursor-pointer">
-                Faça login
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <p className="text-gray-700 font-medium mb-2">
+                Já tem cadastro?
+              </p>
+              <Link 
+                to="/login" 
+                className="inline-block bg-white text-blue-600 font-semibold px-6 py-2 rounded-lg border border-blue-200 hover:bg-blue-50 hover:text-blue-700 transition-all cursor-pointer"
+              >
+                Entrar na minha conta
               </Link>
+            </div>
+          </div>
+
+          <div className="mt-4 text-center">
+            <p className="text-xs text-gray-500">
+              ✅ Acesso completo • ✅ Sem cartão de crédito • ✅ Cancele quando quiser
             </p>
           </div>
         </div>
