@@ -48,7 +48,7 @@ export default function SuggestionBox() {
       {/* Botão Flutuante */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-6 lg:bottom-8 lg:right-8 w-14 h-14 bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center z-40 group"
+        className="fixed bottom-32 right-6 lg:bottom-24 lg:right-8 w-14 h-14 bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center z-40 group"
         title="Enviar Sugestão"
       >
         <i className="ri-lightbulb-line text-2xl group-hover:scale-110 transition-transform duration-300"></i>
@@ -60,25 +60,25 @@ export default function SuggestionBox() {
       {/* Modal */}
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform animate-slideUp">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform animate-slideUp">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-xl flex items-center justify-center">
-                  <i className="ri-lightbulb-line text-2xl text-purple-600 dark:text-purple-400"></i>
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-xl flex items-center justify-center">
+                  <i className="ri-lightbulb-line text-2xl text-purple-600"></i>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900">
                     Envie sua Sugestão
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500">
                     Ajude-nos a melhorar! 🚀
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
+                className="w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
               >
                 <i className="ri-close-line text-xl"></i>
               </button>
@@ -91,14 +91,14 @@ export default function SuggestionBox() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Compartilhe suas ideias, sugestões ou melhorias para o FinanceMEI... 💭"
-                  className="w-full h-32 px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 focus:outline-none resize-none text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-200"
+                  className="w-full h-32 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none resize-none text-gray-900 bg-white placeholder-gray-400 transition-colors duration-200"
                   required
                   disabled={sending}
                 />
 
                 {/* Footer */}
                 <div className="flex items-center justify-between mt-4">
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-gray-500">
                     📧 Enviado para contato@viniciusclemente.com.br
                   </div>
                   <button
@@ -122,13 +122,13 @@ export default function SuggestionBox() {
               </form>
             ) : (
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i className="ri-check-line text-3xl text-green-600 dark:text-green-400"></i>
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="ri-check-line text-3xl text-green-600"></i>
                 </div>
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">
                   Sugestão Enviada! ✅
                 </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600">
                   Obrigado pelo feedback! 🙏
                 </p>
               </div>
