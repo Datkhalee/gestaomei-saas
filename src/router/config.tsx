@@ -1,7 +1,7 @@
 import { RouteObject } from 'react-router-dom';
-import { lazy } from 'react';
+import { lazy, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
-import RedirecionamentoInteligente from '../components/RedirecionamentoInteligente';
 
 // Importações diretas para páginas críticas
 import NovaReceita from '../pages/receitas/NovaReceita';
@@ -25,6 +25,39 @@ const Cadastro = lazy(() => import('../pages/auth/Cadastro'));
 const RecuperarSenha = lazy(() => import('../pages/auth/RecuperarSenha'));
 const Sucesso = lazy(() => import('../pages/Sucesso'));
 const NotFound = lazy(() => import('../pages/NotFound'));
+
+// Componente inline para redirecionamento
+function RedirecionamentoInteligente() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isPrimeiraVisita = !localStorage.getItem('financemei_visited');
+    
+    if (isPrimeiraVisita) {
+      localStorage.setItem('financemei_visited', 'true');
+      
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'ViewContent', {
+          content_name: 'Primeira Visita FinanceMEI',
+          content_category: 'Landing Page'
+        });
+      }
+      
+      navigate('/cadastro');
+    } else {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  return (
+    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Carregando...</p>
+      </div>
+    </div>
+  );
+}
 
 const routes: RouteObject[] = [
   {
