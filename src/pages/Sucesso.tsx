@@ -4,74 +4,129 @@ import { supabase } from '../lib/supabase';
 
 export default function Sucesso() {
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const confirmarPagamento = async () => {
-    if (!email) return setMessage('Digite seu e-mail');
+  const verificarPagamento = async () => {
+    if (!email) {
+      setMessage('❌ Digite seu email');
+      return;
+    }
 
     setLoading(true);
+    setMessage('🔍 Verificando pagamento...');
 
-    // 1️⃣ Verifica pagamento pendente aprovado
-    const { data: pagamento, error } = await supabase
-      .from('pagamentos_pendentes')
-      .select('*')
-      .eq('email', email)
-      .eq('ativado', false)
-      .gt('expires_at', new Date().toISOString())
-      .single();
+    try {
+      // Buscar usuário no banco
+      const { data: user, error } = await supabase
+        .from('users_app')
+        .select('*')
+        .eq('email', email)
+        .single();
 
-    if (error || !pagamento) {
-      setMessage('❌ Pagamento não encontrado ou já ativado');
-      setLoading(false);
-      return;
+      if (error || !user) {
+        setMessage('❌ Email não encontrado. Verifique se está correto.');
+        setLoading(false);
+        return;
+      }
+
+      // Verificar se já tem plano ativo
+      if (user.status_assinatura === 'ativo') {
+        setMessage('✅ Seu plano já está ativo! Redirecionando...');
+        setTimeout(() => navigate('/dashboard'), 2000);
+        setLoading(false);
+        return;
+      }
+
+      // Ativar plano FULL
+      const { data: updatedUser, error: updateError } = await supabase
+        .from('users_app')
+        .update({
+          status_assinatura: 'ativo',
+          trial_expira_em: '2026-12-31T23:59:59.000Z',
+          updated_at: new Date().toISOString()
+        })
+        .eq('email', email)
+        .select();
+
+      if (updateError) {
+        setMessage('❌ Erro ao ativar conta. Tente novamente.');
+        setLoading(false);
+        return;
+      }
+
+      setMessage('🎉 Plano FULL ativado! Redirecionando...');
+      
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
+
+    } catch (error) {
+      setMessage('❌ Erro inesperado. Tente novamente.');
     }
 
-    // 2️⃣ Atualiza usuário para plano FULL
-    const { error: userError } = await supabase
-      .from('users_app')
-      .update({ status_assinatura: 'ativo' })
-      .eq('email', email);
-
-    if (userError) {
-      setMessage('❌ Erro ao liberar o plano');
-      setLoading(false);
-      return;
-    }
-
-    // 3️⃣ Marca pagamento como ativado
-    await supabase
-      .from('pagamentos_pendentes')
-      .update({ ativado: true, ativado_em: new Date().toISOString() })
-      .eq('email', email);
-
-    setMessage('✅ Pagamento confirmado! Redirecionando...');
-    setTimeout(() => navigate('/dashboard'), 2000);
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-green-50">
-      <div className="bg-white rounded-xl p-8 shadow-md max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold mb-4">🎉 Confirme seu e-mail</h1>
-        <p className="text-gray-600 mb-4">
-          Digite o e-mail que você usou na compra para liberar seu plano FULL.
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+        
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i className="ri-check-double-line text-4xl text-green-600"></i>
+        </div>
+
+        <h1 className="text-2xl font-bold text-gray-900 mb-3">
+          🎉 Parabéns! Compra aprovada
+        </h1>
+        
+        <p className="text-gray-600 mb-6">
+          Digite seu email para ativar o plano <strong>FULL</strong>:
         </p>
-        <input
-          type="email"
-          placeholder="Seu e-mail"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 mb-4 border rounded"
-        />
+
+        <div className="mb-4">
+          <input
+            type="email"
+            placeholder="seu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            disabled={loading}
+          />
+        </div>
+
+        {message && (
+          <div className={`mb-4 p-3 rounded-lg text-sm ${
+            message.includes('✅') || message.includes('🎉') 
+              ? 'bg-green-100 text-green-700' 
+              : message.includes('🔍')
+              ? 'bg-blue-100 text-blue-700'
+              : 'bg-red-100 text-red-700'
+          }`}>
+            {message}
+          </div>
+        )}
+
         <button
-          onClick={confirmarPagamento}
+          onClick={verificarPagamento}
           disabled={loading}
-          className="w-full bg-green-600 text-white p-3 rounded hover:bg-green-700"
+          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50"
         >
-          {loading ? 'Verificando...' : 'Confirmar e liberar plano'}
+          {loading ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              Verificando...
+            </div>
+          ) : (
+            '🚀 Ativar Plano FULL'
+          )}
         </button>
-        {message && <p className="mt-4 text-sm">{message}</p>}
+
+        <p className="text-xs text-gray-500 mt-4">
+          Digite o email usado na compra
+        </p>
+
       </div>
     </div>
   );
