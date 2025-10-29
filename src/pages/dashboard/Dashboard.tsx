@@ -398,7 +398,7 @@ export default function Dashboard() {
         </div>
 
         {/* Botões de Ação 2x2 - Desktop/Tablet */}
-        <div className="hidden md:grid grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8 mb-5 animate-fadeIn">
+        <div className="hidden md:grid grid-cols-2 xl:grid-cols-4 gap-8 lg:gap-12 mb-5 animate-fadeIn">
           <button
             onClick={() => setShowNovaReceitaModal(true)}
             className="group bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-500 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:scale-105"
