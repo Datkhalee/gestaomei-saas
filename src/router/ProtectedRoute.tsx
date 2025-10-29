@@ -66,9 +66,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
           >
             <i className="ri-menu-line text-xl"></i>
           </button>
-          <h1 className="text-lg font-bold text-blue-600" style={{ fontFamily: '"Pacifico", serif' }}>
-            FinanceMEI
-          </h1>
+          <img 
+            src="/logo-finance.png" 
+            alt="FinanceMEI" 
+            className="h-8"
+          />
           <div className="w-10"></div> {/* Spacer for centering */}
         </div>
 
