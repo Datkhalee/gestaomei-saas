@@ -35,6 +35,18 @@ export default function Cadastro() {
 
     try {
       await signUp(nome, email, senha);
+      
+      // 🎯 EVENTO FACEBOOK PIXEL - LEAD
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'Lead', {
+          content_name: 'Cadastro Trial FinanceMEI',
+          content_category: 'Trial Signup',
+          value: 27.00,
+          currency: 'BRL',
+          user_email: email
+        });
+      }
+
       setShowWelcome(true);
     } catch (err: any) {
       setError(err.message || 'Erro ao criar conta');
