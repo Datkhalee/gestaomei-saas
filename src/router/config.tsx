@@ -1,4 +1,3 @@
-
 import { RouteObject } from 'react-router-dom';
 import { lazy } from 'react';
 import ProtectedRoute from './ProtectedRoute';
@@ -19,6 +18,7 @@ const RelatoriosPDF = lazy(() => import('../pages/relatorios/RelatoriosPDF'));
 const CalculadoraDAS = lazy(() => import('../pages/calculadora/CalculadoraDAS'));
 const MeuPlano = lazy(() => import('../pages/plano/MeuPlano'));
 const Configuracoes = lazy(() => import('../pages/configuracoes/Configuracoes'));
+const Admin = lazy(() => import('../pages/admin/Admin'));
 const Login = lazy(() => import('../pages/auth/Login'));
 const Cadastro = lazy(() => import('../pages/auth/Cadastro'));
 const RecuperarSenha = lazy(() => import('../pages/auth/RecuperarSenha'));
@@ -96,6 +96,10 @@ const routes: RouteObject[] = [
   {
     path: '/configuracoes',
     element: <ProtectedRoute><Configuracoes /></ProtectedRoute>,
+  },
+  {
+    path: '/admin',
+    element: <ProtectedRoute><Admin /></ProtectedRoute>,
   },
   {
     path: '*',
