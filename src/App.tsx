@@ -1,29 +1,18 @@
-
-import { BrowserRouter } from 'react-router-dom';
-import { Suspense } from 'react';
-import { useRoutes } from 'react-router-dom';
-import routes from './router/config';
-import { AuthProvider } from './contexts/AuthContext';
-
-function AppRoutes() {
-  return useRoutes(routes);
-}
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Sucesso from './pages/Sucesso';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
 
 function App() {
   return (
-    <BrowserRouter basename={__BASE_PATH__}>
-      <AuthProvider>
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center h-screen">
-              <i className="ri-loader-4-line text-4xl text-blue-600 animate-spin"></i>
-            </div>
-          }
-        >
-          <AppRoutes />
-        </Suspense>
-      </AuthProvider>
-    </BrowserRouter>
+    <Router>
+      <Routes>
+        <Route path="/sucesso" element={<Sucesso />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/login" element={<Login />} />
+        {/* outras rotas */}
+      </Routes>
+    </Router>
   );
 }
 
