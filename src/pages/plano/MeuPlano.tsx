@@ -7,15 +7,13 @@ export default function MeuPlano() {
   const { user } = useAuth();
 
   useEffect(() => {
-    // 🎯 EVENTO FACEBOOK PIXEL - INITIATE CHECKOUT
     if (typeof window !== 'undefined' && window.fbq && user) {
       if (user.status_assinatura === 'trial' || user.status_assinatura === 'expired') {
         window.fbq('track', 'InitiateCheckout', {
           content_name: 'Plano Full FinanceMEI',
           content_category: 'Subscription',
           value: 27.00,
-          currency: 'BRL',
-          user_email: user.email
+          currency: 'BRL'
         });
       }
     }
@@ -46,14 +44,11 @@ export default function MeuPlano() {
     : null;
 
   const handleCheckoutClick = () => {
-    // 🎯 EVENTO FACEBOOK PIXEL - ADD TO CART (interesse em compra)
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'AddToCart', {
         content_name: 'Clique Checkout FinanceMEI',
-        content_category: 'Checkout Interest',
         value: 27.00,
-        currency: 'BRL',
-        user_email: user.email
+        currency: 'BRL'
       });
     }
   };
@@ -192,11 +187,10 @@ export default function MeuPlano() {
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleCheckoutClick}
-          className={`${baseClasses} ${
-            isExpirado 
-              ? 'bg-red-600 hover:bg-red-700 text-white' 
-              : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
-          }`}
+          className={baseClasses + " " + (isExpirado 
+            ? 'bg-red-600 hover:bg-red-700 text-white' 
+            : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
+          )}
         >
           <i className="ri-vip-crown-line text-xl"></i>
           {isExpirado ? 'REATIVAR AGORA' : 'ASSINAR AGORA'}
@@ -210,7 +204,7 @@ export default function MeuPlano() {
           href="https://pay.cakto.com.br/38pmmdm_618893"
           target="_blank"
           rel="noopener noreferrer"
-          className={`${baseClasses} bg-gray-600 hover:bg-gray-700 text-white`}
+          className={baseClasses + " bg-gray-600 hover:bg-gray-700 text-white"}
         >
           <i className="ri-settings-3-line text-xl"></i>
           Gerenciar Assinatura
@@ -225,7 +219,7 @@ export default function MeuPlano() {
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleCheckoutClick}
-          className={`${baseClasses} bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white`}
+          className={baseClasses + " bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"}
         >
           <i className="ri-restart-line text-xl"></i>
           Reativar Assinatura
