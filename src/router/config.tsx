@@ -22,6 +22,7 @@ const Admin = lazy(() => import('../pages/admin/Admin'));
 const Login = lazy(() => import('../pages/auth/Login'));
 const Cadastro = lazy(() => import('../pages/auth/Cadastro'));
 const RecuperarSenha = lazy(() => import('../pages/auth/RecuperarSenha'));
+const Sucesso = lazy(() => import('../pages/Sucesso'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
 const routes: RouteObject[] = [
@@ -40,6 +41,10 @@ const routes: RouteObject[] = [
   {
     path: '/recuperar-senha',
     element: <RecuperarSenha />,
+  },
+  {
+    path: '/sucesso',
+    element: <Sucesso />,
   },
   {
     path: '/dashboard',
