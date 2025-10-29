@@ -69,8 +69,32 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [faturamentoAnual, setFaturamentoAnual] = useState(0);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const LIMITE_ANUAL_MEI = 81000;
+
+  // Toggle Dark Mode
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem('darkMode', JSON.stringify(newMode));
+    if (newMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     if (user) {
@@ -291,7 +315,27 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
         
         {/* Status Badge Discreto - Topo */}
-        <div className="flex justify-end mb-2 sm:mb-3">
+        <div className="flex justify-end items-center gap-3 mb-2 sm:mb-3">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200"
+            title={darkMode ? 'Modo Claro' : 'Modo Escuro'}
+          >
+            {darkMode ? (
+              <>
+                <i className="ri-sun-line text-yellow-500"></i>
+                <span className="hidden sm:inline">Claro</span>
+              </>
+            ) : (
+              <>
+                <i className="ri-moon-line text-indigo-600"></i>
+                <span className="hidden sm:inline">Escuro</span>
+              </>
+            )}
+          </button>
+
+          {/* Status Badge */}
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
             user?.status_assinatura === 'trial' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
             user?.status_assinatura === 'ativo' ? 'bg-green-100 text-green-800 border border-green-300' : 
@@ -353,7 +397,7 @@ export default function Dashboard() {
         </div>
 
         {/* Botões de Ação 2x2 - Desktop/Tablet */}
-        <div className="hidden lg:grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5 animate-fadeIn">
+        <div className="hidden lg:grid grid-cols-2 xl:grid-cols-4 gap-5 mb-5 animate-fadeIn">
           <button
             onClick={() => setShowNovaReceitaModal(true)}
             className="group bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-500 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:scale-105"
