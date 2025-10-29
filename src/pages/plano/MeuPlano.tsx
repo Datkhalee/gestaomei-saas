@@ -45,6 +45,19 @@ export default function MeuPlano() {
     ? new Date(new Date(user.data_ultima_cobranca).getTime() + 30 * 24 * 60 * 60 * 1000)
     : null;
 
+  const handleCheckoutClick = () => {
+    // 🎯 EVENTO FACEBOOK PIXEL - ADD TO CART (interesse em compra)
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'AddToCart', {
+        content_name: 'Clique Checkout FinanceMEI',
+        content_category: 'Checkout Interest',
+        value: 27.00,
+        currency: 'BRL',
+        user_email: user.email
+      });
+    }
+  };
+
   const getStatusCard = () => {
     if (isTrial) {
       return (
@@ -167,19 +180,6 @@ export default function MeuPlano() {
     }
 
     return null;
-  };
-
-  const handleCheckoutClick = () => {
-    // 🎯 EVENTO FACEBOOK PIXEL - ADD TO CART (interesse em compra)
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'AddToCart', {
-        content_name: 'Clique Checkout FinanceMEI',
-        content_category: 'Checkout Interest',
-        value: 27.00,
-        currency: 'BRL',
-        user_email: user.email
-      });
-    }
   };
 
   const getActionButton = () => {
