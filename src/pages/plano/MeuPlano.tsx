@@ -158,8 +158,10 @@ export default function MeuPlano() {
     
     if (isTrial || isExpirado) {
       return (
-        
+        <a
           href="https://pay.cakto.com.br/38pmmdm_618893"
+          target="_blank"
+          rel="noopener noreferrer"
           className={`${baseClasses} ${
             isExpirado 
               ? 'bg-red-600 hover:bg-red-700 text-white' 
@@ -174,8 +176,10 @@ export default function MeuPlano() {
 
     if (isAtivo) {
       return (
-        
+        <a
           href="https://pay.cakto.com.br/38pmmdm_618893"
+          target="_blank"
+          rel="noopener noreferrer"
           className={`${baseClasses} bg-gray-600 hover:bg-gray-700 text-white`}
         >
           <i className="ri-settings-3-line text-xl"></i>
@@ -186,8 +190,10 @@ export default function MeuPlano() {
 
     if (isCancelado) {
       return (
-        
+        <a
           href="https://pay.cakto.com.br/38pmmdm_618893"
+          target="_blank"
+          rel="noopener noreferrer"
           className={`${baseClasses} bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white`}
         >
           <i className="ri-restart-line text-xl"></i>
