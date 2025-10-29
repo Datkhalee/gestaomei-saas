@@ -97,10 +97,7 @@ export default function SuggestionBox() {
                 />
 
                 {/* Footer */}
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-xs text-gray-500">
-                    📧 Enviado para contato@viniciusclemente.com.br
-                  </div>
+                <div className="flex items-center justify-end mt-4">
                   <button
                     type="submit"
                     disabled={sending || !message.trim()}
