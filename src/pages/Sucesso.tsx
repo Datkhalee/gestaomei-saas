@@ -39,12 +39,19 @@ export default function Sucesso() {
         return;
       }
 
-      // Ativar plano FULL
+      // Calcular próximo vencimento (30 dias)
+      const proximoVencimento = new Date()
+      proximoVencimento.setMonth(proximoVencimento.getMonth() + 1)
+
+      // Ativar plano FULL com controle de vencimento
       const { data: updatedUser, error: updateError } = await supabase
         .from('users_app')
         .update({
           status_assinatura: 'ativo',
           trial_expira_em: '2026-12-31T23:59:59.000Z',
+          pagamento_vence_em: proximoVencimento.toISOString().split('T')[0],
+          ultimo_pagamento: new Date().toISOString().split('T')[0],
+          status_pagamento: 'em_dia',
           updated_at: new Date().toISOString()
         })
         .eq('email', email)
