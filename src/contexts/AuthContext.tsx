@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase, User } from '../lib/supabase';
+import { useEmailService } from '../hooks/useEmailService';
 
 interface AuthContextType {
   user: User | null;
@@ -56,6 +57,7 @@ const safeRemoveItem = (key: string) => {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { sendWelcomeEmail } = useEmailService();
 
   useEffect(() => {
     checkUser();
@@ -167,6 +169,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (newUser) {
         setUser(newUser);
         safeSetItem('financemei_user', JSON.stringify({ email, senha }));
+        
+        // 🆕 ENVIAR EMAIL DE BOAS-VINDAS
+        try {
+          await sendWelcomeEmail(email, nome);
+          console.log('✅ Email de boas-vindas enviado');
+        } catch (emailError) {
+          console.warn('⚠️ Erro ao enviar email de boas-vindas:', emailError);
+          // Não interrompe o cadastro por erro de email
+        }
       } else {
         throw new Error('Erro ao criar conta. Nenhum dado retornado.');
       }
