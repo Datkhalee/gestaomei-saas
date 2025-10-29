@@ -1,6 +1,7 @@
 import { RouteObject } from 'react-router-dom';
 import { lazy } from 'react';
 import ProtectedRoute from './ProtectedRoute';
+import RedirecionamentoInteligente from '../components/RedirecionamentoInteligente';
 
 // Importações diretas para páginas críticas
 import NovaReceita from '../pages/receitas/NovaReceita';
@@ -28,6 +29,10 @@ const NotFound = lazy(() => import('../pages/NotFound'));
 const routes: RouteObject[] = [
   {
     path: '/',
+    element: <RedirecionamentoInteligente />,
+  },
+  {
+    path: '/home',
     element: <Home />,
   },
   {
