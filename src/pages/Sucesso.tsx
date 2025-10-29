@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Sucesso() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
 
   const verificarPagamento = async () => {
     if (!email) {
@@ -34,6 +36,7 @@ export default function Sucesso() {
       // Verificar se já tem plano ativo
       if (user.status_assinatura === 'ativo') {
         setMessage('✅ Seu plano já está ativo! Redirecionando...');
+        await updateUser(); // Atualizar AuthContext
         setTimeout(() => navigate('/dashboard'), 2000);
         setLoading(false);
         return;
@@ -64,6 +67,9 @@ export default function Sucesso() {
       }
 
       setMessage('🎉 Plano FULL ativado! Redirecionando...');
+      
+      // 🆕 ATUALIZAR AUTHCONTEXT
+      await updateUser();
       
       setTimeout(() => {
         navigate('/dashboard');
