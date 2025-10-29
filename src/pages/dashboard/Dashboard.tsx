@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import FinancialChart from '../../components/dashboard/FinancialChart';
 import MEIAlerts from '../../components/dashboard/MEIAlerts';
 import QuickActions from '../../components/dashboard/QuickActions';
+import SuggestionBox from '../../components/dashboard/SuggestionBox';
 import NovaReceitaModal from '../../components/modals/NovaReceitaModal';
 import NovaDespesaModal from '../../components/modals/NovaDespesaModal';
 import NovaContaPagarModal from '../../components/modals/NovaContaPagarModal';
@@ -301,17 +302,17 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando dashboard...</p>
+          <p className="text-gray-600 dark:text-gray-400">Carregando dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 lg:pb-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 lg:pb-8 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
         
         {/* Status Badge Discreto - Topo */}
@@ -397,7 +398,7 @@ export default function Dashboard() {
         </div>
 
         {/* Botões de Ação 2x2 - Desktop/Tablet */}
-        <div className="hidden lg:grid grid-cols-2 xl:grid-cols-4 gap-5 mb-5 animate-fadeIn">
+        <div className="hidden md:grid grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8 mb-5 animate-fadeIn">
           <button
             onClick={() => setShowNovaReceitaModal(true)}
             className="group bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-500 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:scale-105"
@@ -860,6 +861,24 @@ export default function Dashboard() {
           transform: scale(1.05);
         }
       `}</style>
+
+      {/* Rodapé */}
+      <footer className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          © {new Date().getFullYear()} SaaS desenvolvido por{' '}
+          <a 
+            href="https://viniciusclemente.com.br" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            Vinicius Clemente
+          </a>
+        </p>
+      </footer>
+
+      {/* Caixa de Sugestões */}
+      <SuggestionBox />
     </div>
   );
 }
