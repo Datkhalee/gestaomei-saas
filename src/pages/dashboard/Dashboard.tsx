@@ -35,19 +35,6 @@ interface ResumoData {
   contasReceberProximas: any[];
 }
 
-interface ChartData {
-  mes: string;
-  receitas: number;
-  despesas: number;
-  saldo: number;
-}
-
-interface CategoryData {
-  name: string;
-  value: number;
-  color: string;
-}
-
 const COLORS = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4'];
 
 export default function Dashboard() {
@@ -57,6 +44,7 @@ export default function Dashboard() {
   const [showNovaDespesaModal, setShowNovaDespesaModal] = useState(false);
   const [showNovaContaPagarModal, setShowNovaContaPagarModal] = useState(false);
   const [showNovaContaReceberModal, setShowNovaContaReceberModal] = useState(false);
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const [data, setData] = useState<DashboardData>({
     totalReceitas: 0,
     totalDespesas: 0,
@@ -78,20 +66,15 @@ export default function Dashboard() {
     contasPagarProximas: [],
     contasReceberProximas: [],
   });
-  const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  // Controle de limite anual MEI
-  const LIMITE_ANUAL_MEI = 81000; // R$ 81.000 em 2024
   const [faturamentoAnual, setFaturamentoAnual] = useState(0);
+
+  const LIMITE_ANUAL_MEI = 81000;
 
   useEffect(() => {
     if (user) {
       loadDashboardData();
-      loadChartData();
-      loadCategoryData();
       loadFaturamentoAnual();
       loadResumoData();
     }
@@ -107,7 +90,6 @@ export default function Dashboard() {
       const mesAnterior = startOfMonth(subMonths(hoje, 1));
       const fimMesAnterior = endOfMonth(subMonths(hoje, 1));
 
-      // Receitas mês atual
       const { data: receitasMesAtual } = await supabase
         .from('receitas')
         .select('valor')
@@ -115,7 +97,6 @@ export default function Dashboard() {
         .gte('data', format(mesAtual, 'yyyy-MM-dd'))
         .lte('data', format(fimMesAtual, 'yyyy-MM-dd'));
 
-      // Receitas mês anterior
       const { data: receitasMesAnterior } = await supabase
         .from('receitas')
         .select('valor')
@@ -123,7 +104,6 @@ export default function Dashboard() {
         .gte('data', format(mesAnterior, 'yyyy-MM-dd'))
         .lte('data', format(fimMesAnterior, 'yyyy-MM-dd'));
 
-      // Despesas mês atual
       const { data: despesasMesAtual } = await supabase
         .from('despesas')
         .select('valor')
@@ -131,7 +111,6 @@ export default function Dashboard() {
         .gte('data', format(mesAtual, 'yyyy-MM-dd'))
         .lte('data', format(fimMesAtual, 'yyyy-MM-dd'));
 
-      // Despesas mês anterior
       const { data: despesasMesAnterior } = await supabase
         .from('despesas')
         .select('valor')
@@ -139,7 +118,6 @@ export default function Dashboard() {
         .gte('data', format(mesAnterior, 'yyyy-MM-dd'))
         .lte('data', format(fimMesAnterior, 'yyyy-MM-dd'));
 
-      // Faturamento anual
       const anoAtual = new Date().getFullYear();
       const inicioAno = new Date(anoAtual, 0, 1);
       const fimAno = new Date(anoAtual, 11, 31);
@@ -151,7 +129,6 @@ export default function Dashboard() {
         .gte('data', format(inicioAno, 'yyyy-MM-dd'))
         .lte('data', format(fimAno, 'yyyy-MM-dd'));
 
-      // Contas próximas do vencimento (próximos 30 dias)
       const proximosDias = addMonths(hoje, 1);
 
       const { data: contasPagar } = await supabase
@@ -200,7 +177,6 @@ export default function Dashboard() {
     const endDate = endOfMonth(currentMonth);
 
     try {
-      // Receitas do mês
       const { data: receitas } = await supabase
         .from('receitas')
         .select('*')
@@ -208,7 +184,6 @@ export default function Dashboard() {
         .gte('data', format(startDate, 'yyyy-MM-dd'))
         .lte('data', format(endDate, 'yyyy-MM-dd'));
 
-      // Despesas do mês
       const { data: despesas } = await supabase
         .from('despesas')
         .select('*')
@@ -216,14 +191,12 @@ export default function Dashboard() {
         .gte('data', format(startDate, 'yyyy-MM-dd'))
         .lte('data', format(endDate, 'yyyy-MM-dd'));
 
-      // Contas a pagar
       const { data: contasPagar } = await supabase
         .from('contas_pagar')
         .select('*')
         .eq('user_id', user.id)
         .eq('pago', false);
 
-      // Contas a receber
       const { data: contasReceber } = await supabase
         .from('contas_receber')
         .select('*')
@@ -255,70 +228,6 @@ export default function Dashboard() {
     }
   };
 
-  const loadChartData = async () => {
-    if (!user) return;
-
-    const months = [];
-    for (let i = 5; i >= 0; i--) {
-      const date = subMonths(currentMonth, i);
-      const startDate = startOfMonth(date);
-      const endDate = endOfMonth(date);
-
-      const { data: receitas } = await supabase
-        .from('receitas')
-        .select('valor')
-        .eq('user_id', user.id)
-        .gte('data', format(startDate, 'yyyy-MM-dd'))
-        .lte('data', format(endDate, 'yyyy-MM-dd'));
-
-      const { data: despesas } = await supabase
-        .from('despesas')
-        .select('valor')
-        .eq('user_id', user.id)
-        .gte('data', format(startDate, 'yyyy-MM-dd'))
-        .lte('data', format(endDate, 'yyyy-MM-dd'));
-
-      const totalReceitas = receitas?.reduce((acc, item) => acc + item.valor, 0) || 0;
-      const totalDespesas = despesas?.reduce((acc, item) => acc + item.valor, 0) || 0;
-
-      months.push({
-        mes: format(date, 'MMM', { locale: ptBR }),
-        receitas: totalReceitas,
-        despesas: totalDespesas,
-        saldo: totalReceitas - totalDespesas,
-      });
-    }
-
-    setChartData(months);
-  };
-
-  const loadCategoryData = async () => {
-    if (!user) return;
-
-    const startDate = startOfMonth(currentMonth);
-    const endDate = endOfMonth(currentMonth);
-
-    const { data: receitas } = await supabase
-      .from('receitas')
-      .select('categoria, valor')
-      .eq('user_id', user.id)
-      .gte('data', format(startDate, 'yyyy-MM-dd'))
-      .lte('data', format(endDate, 'yyyy-MM-dd'));
-
-    const categories: { [key: string]: number } = {};
-    receitas?.forEach(receita => {
-      categories[receita.categoria] = (categories[receita.categoria] || 0) + receita.valor;
-    });
-
-    const categoryArray = Object.entries(categories).map(([name, value], index) => ({
-      name,
-      value,
-      color: COLORS[index % COLORS.length],
-    }));
-
-    setCategoryData(categoryArray);
-  };
-
   const loadFaturamentoAnual = async () => {
     if (!user) return;
 
@@ -337,14 +246,6 @@ export default function Dashboard() {
     setFaturamentoAnual(total);
   };
 
-  const previousMonth = () => {
-    setCurrentMonth(subMonths(currentMonth, 1));
-  };
-
-  const nextMonth = () => {
-    setCurrentMonth(addMonths(currentMonth, 1));
-  };
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -352,367 +253,508 @@ export default function Dashboard() {
     }).format(value);
   };
 
+  const calcularVariacao = (atual: number, anterior: number) => {
+    if (anterior === 0) return atual > 0 ? 100 : 0;
+    return ((atual - anterior) / anterior) * 100;
+  };
+
+  const formatarVariacao = (atual: number, anterior: number) => {
+    const variacao = calcularVariacao(atual, anterior);
+    const diferenca = atual - anterior;
+    const sinal = diferenca >= 0 ? '+' : '';
+    return {
+      porcentagem: `${sinal}${variacao.toFixed(1)}%`,
+      valor: `${sinal}${formatCurrency(Math.abs(diferenca))}`,
+      positivo: diferenca >= 0,
+    };
+  };
+
   const handleModalSuccess = () => {
     loadDashboardData();
     loadResumoData();
-    loadChartData();
-    loadCategoryData();
     loadFaturamentoAnual();
   };
-
-  const percentualLimite = (faturamentoAnual / LIMITE_ANUAL_MEI) * 100;
-  const isProximoLimite = percentualLimite > 80;
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+    <div className="min-h-screen bg-gray-50 pb-20 lg:pb-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
         
-        {/* Banner de Boas-vindas - MOBILE FIRST */}
-        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 rounded-2xl p-4 sm:p-6 text-white mb-4 sm:mb-6 shadow-lg">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">
+        {/* Status Badge Discreto - Topo */}
+        <div className="flex justify-end mb-2 sm:mb-3">
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
+            user?.status_assinatura === 'trial' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
+            user?.status_assinatura === 'ativo' ? 'bg-green-100 text-green-800 border border-green-300' : 
+            'bg-red-100 text-red-800 border border-red-300'
+          }`}>
+            <span className={`w-2 h-2 rounded-full ${
+              user?.status_assinatura === 'trial' ? 'bg-yellow-500 animate-pulse' :
+              user?.status_assinatura === 'ativo' ? 'bg-green-500' : 'bg-red-500'
+            }`}></span>
+            {user?.status_assinatura === 'trial' ? 'Trial' :
+             user?.status_assinatura === 'ativo' ? 'Ativo' : 'Expirado'}
+          </div>
+        </div>
+
+        {/* Header Compacto e Recolhível */}
+        <div 
+          className={`bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 rounded-2xl text-white mb-4 sm:mb-5 shadow-lg transition-all duration-300 overflow-hidden ${
+            headerCollapsed ? 'p-3 sm:p-4' : 'p-4 sm:p-5 lg:p-6'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <h1 className={`font-bold mb-1 transition-all duration-300 ${
+                headerCollapsed ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl lg:text-3xl'
+              }`}>
                 Olá, {user?.nome?.split(' ')[0]}! 👋
               </h1>
-              <p className="text-blue-100 text-sm sm:text-base">
-                Bem-vindo ao seu painel financeiro
-              </p>
+              {!headerCollapsed && (
+                <p className="text-blue-100 text-sm sm:text-base animate-fadeIn">
+                  Bem-vindo ao seu painel financeiro
+                </p>
+              )}
             </div>
             
-            {/* Status Badge - Mobile otimizado */}
-            <div className="flex items-center gap-3 sm:gap-4">
-              <button
-                onClick={() => setShowNovaReceitaModal(true)}
-                className="flex-1 sm:flex-none bg-green-500 hover:bg-green-600 active:bg-green-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[44px]"
-              >
-                <i className="ri-add-line text-lg"></i>
-                <span className="hidden sm:inline">Nova Receita</span>
-                <span className="sm:hidden">Receita</span>
-              </button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              {!headerCollapsed && (
+                <button
+                  onClick={() => navigate('/relatorios')}
+                  className="hidden sm:flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200"
+                >
+                  <i className="ri-file-chart-line"></i>
+                  <span>Relatório</span>
+                </button>
+              )}
               
-              <div className="hidden sm:block text-right bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
-                <div className="text-xs text-blue-200 mb-0.5">Status</div>
-                <div className={`text-sm font-semibold ${
-                  user?.status_assinatura === 'trial' ? 'text-yellow-200' :
-                  user?.status_assinatura === 'ativo' ? 'text-green-200' : 'text-red-200'
-                }`}>
-                  {user?.status_assinatura === 'trial' ? '🔄 Trial' :
-                   user?.status_assinatura === 'ativo' ? '✅ Ativo' : '❌ Expirado'}
-                </div>
-              </div>
+              <button
+                onClick={() => setHeaderCollapsed(!headerCollapsed)}
+                className="w-8 h-8 sm:w-9 sm:h-9 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg flex items-center justify-center transition-all duration-200"
+              >
+                <i className={`ri-arrow-${headerCollapsed ? 'down' : 'up'}-s-line text-lg transition-transform duration-300`}></i>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Alertas MEI */}
-        <MEIAlerts />
-
-        {/* Botões de Ação Rápida - MOBILE */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6 lg:hidden">
-          <button
-            onClick={() => setShowNovaReceitaModal(true)}
-            className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-3 py-3 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[56px]"
-          >
-            <i className="ri-add-circle-line text-xl"></i>
-            <span>Receita</span>
-          </button>
-          <button
-            onClick={() => setShowNovaDespesaModal(true)}
-            className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-3 py-3 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[56px]"
-          >
-            <i className="ri-subtract-line text-xl"></i>
-            <span>Despesa</span>
-          </button>
-          <button
-            onClick={() => setShowNovaContaPagarModal(true)}
-            className="bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white px-3 py-3 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[56px]"
-          >
-            <i className="ri-file-list-line text-xl"></i>
-            <span>Pagar</span>
-          </button>
-          <button
-            onClick={() => setShowNovaContaReceberModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-3 py-3 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[56px]"
-          >
-            <i className="ri-file-text-line text-xl"></i>
-            <span>Receber</span>
-          </button>
+        <div className="animate-fadeIn">
+          <MEIAlerts />
         </div>
 
-        {/* Botões de Ação - DESKTOP/TABLET */}
-        <div className="hidden lg:flex flex-wrap gap-3 mb-6">
+        {/* Botões de Ação 2x2 - Desktop/Tablet */}
+        <div className="hidden lg:grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5 animate-fadeIn">
           <button
             onClick={() => setShowNovaReceitaModal(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+            className="group bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-500 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:scale-105"
           >
-            <i className="ri-add-line text-lg"></i>
-            Nova Receita
-          </button>
-          <button
-            onClick={() => setShowNovaDespesaModal(true)}
-            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
-          >
-            <i className="ri-add-line text-lg"></i>
-            Nova Despesa
-          </button>
-          <button
-            onClick={() => setShowNovaContaPagarModal(true)}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
-          >
-            <i className="ri-add-line text-lg"></i>
-            Conta a Pagar
-          </button>
-          <button
-            onClick={() => setShowNovaContaReceberModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
-          >
-            <i className="ri-add-line text-lg"></i>
-            Conta a Receber
-          </button>
-        </div>
-
-        {/* Cards de Resumo - RESPONSIVO */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
-          {/* Receitas do Mês */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 p-4 sm:p-5 lg:p-6">
-            <div className="flex items-start justify-between mb-3 sm:mb-4">
-              <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Receitas do Mês</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 leading-tight">
-                  {loading ? '...' : formatCurrency(resumo.receitasMes)}
-                </p>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-green-100 group-hover:bg-green-500 rounded-xl flex items-center justify-center transition-colors duration-200">
+                <i className="ri-add-circle-line text-2xl text-green-600 group-hover:text-white transition-colors duration-200"></i>
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <i className="ri-arrow-up-line text-xl sm:text-2xl text-green-600"></i>
+              <div className="text-left">
+                <div className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors duration-200">Nova Receita</div>
+                <div className="text-xs text-gray-500">Adicionar entrada</div>
               </div>
             </div>
-            <div className="flex items-center text-xs sm:text-sm">
-              <span className="text-gray-500 truncate">
-                {resumo.receitasMes > resumo.receitasMesAnterior ? '📈' : '📉'} 
-                {resumo.receitasMes > 0 ? 
-                  ` ${((resumo.receitasMes - resumo.receitasMesAnterior) / Math.max(resumo.receitasMesAnterior, 1) * 100).toFixed(1)}%` : 
-                  ' 0%'} vs anterior
-              </span>
+          </button>
+
+          <button
+            onClick={() => setShowNovaDespesaModal(true)}
+            className="group bg-white hover:bg-red-50 border-2 border-gray-200 hover:border-red-500 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:scale-105"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-red-100 group-hover:bg-red-500 rounded-xl flex items-center justify-center transition-colors duration-200">
+                <i className="ri-subtract-line text-2xl text-red-600 group-hover:text-white transition-colors duration-200"></i>
+              </div>
+              <div className="text-left">
+                <div className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors duration-200">Nova Despesa</div>
+                <div className="text-xs text-gray-500">Adicionar saída</div>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setShowNovaContaPagarModal(true)}
+            className="group bg-white hover:bg-orange-50 border-2 border-gray-200 hover:border-orange-500 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:scale-105"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-orange-100 group-hover:bg-orange-500 rounded-xl flex items-center justify-center transition-colors duration-200">
+                <i className="ri-file-list-line text-2xl text-orange-600 group-hover:text-white transition-colors duration-200"></i>
+              </div>
+              <div className="text-left">
+                <div className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors duration-200">Conta a Pagar</div>
+                <div className="text-xs text-gray-500">Registrar débito</div>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setShowNovaContaReceberModal(true)}
+            className="group bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-500 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg hover:scale-105"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-100 group-hover:bg-blue-500 rounded-xl flex items-center justify-center transition-colors duration-200">
+                <i className="ri-file-text-line text-2xl text-blue-600 group-hover:text-white transition-colors duration-200"></i>
+              </div>
+              <div className="text-left">
+                <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Conta a Receber</div>
+                <div className="text-xs text-gray-500">Registrar crédito</div>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* Cards de Indicadores com Tendências */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-5 animate-slideUp">
+          {/* Receitas do Mês */}
+          <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-4 sm:p-5 group hover:scale-105">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                  <i className="ri-funds-line"></i>
+                  Receitas do Mês
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600 leading-tight mb-2">
+                  {formatCurrency(resumo.receitasMes)}
+                </p>
+                {(() => {
+                  const variacao = formatarVariacao(resumo.receitasMes, resumo.receitasMesAnterior);
+                  return (
+                    <div className="flex items-center gap-1 text-xs">
+                      <span className={`font-semibold ${variacao.positivo ? 'text-green-600' : 'text-red-600'}`}>
+                        {variacao.positivo ? '↑' : '↓'} {variacao.porcentagem}
+                      </span>
+                      <span className="text-gray-500">vs anterior</span>
+                    </div>
+                  );
+                })()}
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <i className="ri-arrow-up-line text-2xl text-green-600"></i>
+              </div>
             </div>
           </div>
 
           {/* Despesas do Mês */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 p-4 sm:p-5 lg:p-6">
-            <div className="flex items-start justify-between mb-3 sm:mb-4">
+          <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-4 sm:p-5 group hover:scale-105">
+            <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Despesas do Mês</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 leading-tight">
-                  {loading ? '...' : formatCurrency(resumo.despesasMes)}
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                  <i className="ri-money-dollar-circle-line"></i>
+                  Despesas do Mês
                 </p>
+                <p className="text-2xl sm:text-3xl font-bold text-red-600 leading-tight mb-2">
+                  {formatCurrency(resumo.despesasMes)}
+                </p>
+                {(() => {
+                  const variacao = formatarVariacao(resumo.despesasMes, resumo.despesasMesAnterior);
+                  return (
+                    <div className="flex items-center gap-1 text-xs">
+                      <span className={`font-semibold ${variacao.positivo ? 'text-red-600' : 'text-green-600'}`}>
+                        {variacao.positivo ? '↑' : '↓'} {variacao.porcentagem}
+                      </span>
+                      <span className="text-gray-500">vs anterior</span>
+                    </div>
+                  );
+                })()}
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <i className="ri-arrow-down-line text-xl sm:text-2xl text-red-600"></i>
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <i className="ri-arrow-down-line text-2xl text-red-600"></i>
               </div>
-            </div>
-            <div className="flex items-center text-xs sm:text-sm">
-              <span className="text-gray-500 truncate">
-                {resumo.despesasMes > resumo.despesasMesAnterior ? '📈' : '📉'} 
-                {resumo.despesasMes > 0 ? 
-                  ` ${((resumo.despesasMes - resumo.despesasMesAnterior) / Math.max(resumo.despesasMesAnterior, 1) * 100).toFixed(1)}%` : 
-                  ' 0%'} vs anterior
-              </span>
             </div>
           </div>
 
-          {/* Lucro do Mês */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 p-4 sm:p-5 lg:p-6">
-            <div className="flex items-start justify-between mb-3 sm:mb-4">
+          {/* Lucro do Mês - DESTAQUE */}
+          <div className={`rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-5 group hover:scale-105 border-2 ${
+            resumo.lucroMes >= 0 
+              ? 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300' 
+              : 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-300'
+          }`}>
+            <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Lucro do Mês</p>
-                <p className={`text-xl sm:text-2xl lg:text-3xl font-bold leading-tight ${resumo.lucroMes >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-                  {loading ? '...' : formatCurrency(resumo.lucroMes)}
+                <p className="text-xs sm:text-sm font-semibold mb-1 flex items-center gap-1.5 text-gray-700">
+                  <i className="ri-trophy-line text-base"></i>
+                  Lucro do Mês
                 </p>
+                <p className={`text-2xl sm:text-3xl font-bold leading-tight mb-2 ${
+                  resumo.lucroMes >= 0 ? 'text-blue-700' : 'text-orange-700'
+                }`}>
+                  {formatCurrency(resumo.lucroMes)}
+                </p>
+                <div className="flex items-center gap-1 text-xs">
+                  <span className={`font-semibold ${resumo.lucroMes >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
+                    {resumo.lucroMes >= 0 ? '💰 Positivo' : '⚠️ Negativo'}
+                  </span>
+                </div>
               </div>
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                resumo.lucroMes >= 0 ? 'bg-blue-100' : 'bg-orange-100'
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 ${
+                resumo.lucroMes >= 0 ? 'bg-blue-200' : 'bg-orange-200'
               }`}>
-                <i className={`ri-line-chart-line text-xl sm:text-2xl ${
-                  resumo.lucroMes >= 0 ? 'text-blue-600' : 'text-orange-600'
+                <i className={`ri-line-chart-line text-2xl ${
+                  resumo.lucroMes >= 0 ? 'text-blue-700' : 'text-orange-700'
                 }`}></i>
               </div>
-            </div>
-            <div className="flex items-center text-xs sm:text-sm">
-              <span className="text-gray-500 truncate">
-                {resumo.lucroMes >= 0 ? '💰 Lucro' : '⚠️ Prejuízo'} este mês
-              </span>
             </div>
           </div>
 
           {/* Faturamento Anual */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 p-4 sm:p-5 lg:p-6">
-            <div className="flex items-start justify-between mb-3 sm:mb-4">
+          <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-4 sm:p-5 group hover:scale-105">
+            <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Faturamento Anual</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600 leading-tight">
-                  {loading ? '...' : formatCurrency(resumo.faturamentoAnual)}
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
+                  <i className="ri-bar-chart-box-line"></i>
+                  Faturamento Anual
                 </p>
+                <p className="text-2xl sm:text-3xl font-bold text-purple-600 leading-tight mb-2">
+                  {formatCurrency(resumo.faturamentoAnual)}
+                </p>
+                <div className="flex items-center gap-1 text-xs">
+                  <span className="font-semibold text-purple-600">
+                    {((resumo.faturamentoAnual / LIMITE_ANUAL_MEI) * 100).toFixed(1)}%
+                  </span>
+                  <span className="text-gray-500">do limite MEI</span>
+                </div>
               </div>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <i className="ri-bar-chart-line text-xl sm:text-2xl text-purple-600"></i>
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <i className="ri-bar-chart-line text-2xl text-purple-600"></i>
               </div>
             </div>
-            <div className="flex items-center text-xs sm:text-sm">
-              <span className="text-gray-500 truncate">
-                📊 {((resumo.faturamentoAnual / 81000) * 100).toFixed(1)}% do limite MEI
-              </span>
+            {/* Barra de progresso */}
+            <div className="mt-3">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-purple-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((resumo.faturamentoAnual / LIMITE_ANUAL_MEI) * 100, 100)}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Gráfico e Ações Rápidas */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
-          {/* Gráfico Financeiro */}
-          <div className="xl:col-span-2">
-            <FinancialChart />
-          </div>
-
-          {/* Ações Rápidas - Desktop */}
-          <div className="hidden lg:block">
-            <QuickActions 
-              onNovaReceita={() => setShowNovaReceitaModal(true)}
-              onNovaDespesa={() => setShowNovaDespesaModal(true)}
-              onNovaContaPagar={() => setShowNovaContaPagarModal(true)}
-              onNovaContaReceber={() => setShowNovaContaReceberModal(true)}
-            />
-          </div>
+        {/* Gráfico Financeiro */}
+        <div className="mb-4 sm:mb-5 animate-slideUp" style={{ animationDelay: '100ms' }}>
+          <FinancialChart />
         </div>
 
-        {/* Contas Próximas do Vencimento - RESPONSIVO */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+        {/* Contas Próximas - Apenas 2 itens + Ver todas */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5 animate-slideUp" style={{ animationDelay: '200ms' }}>
           {/* Contas a Pagar */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 lg:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
-              <i className="ri-money-dollar-circle-line mr-2 text-red-600 text-xl"></i>
-              <span>Contas a Pagar</span>
-              <span className="ml-auto text-xs sm:text-sm font-normal text-gray-500">(Próximas)</span>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <i className="ri-file-list-3-line text-xl text-red-600"></i>
+              <span>💳 Contas a Pagar</span>
+              {resumo.contasPagarProximas.length > 0 && (
+                <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                  {resumo.contasPagarProximas.length}
+                </span>
+              )}
             </h3>
             
-            {loading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
-              </div>
-            ) : resumo.contasPagarProximas.length === 0 ? (
-              <div className="text-center py-6 sm:py-8">
-                <i className="ri-checkbox-circle-line text-3xl sm:text-4xl text-green-500 mb-2 sm:mb-3"></i>
-                <p className="text-sm sm:text-base text-gray-500">Nenhuma conta próxima</p>
+            {resumo.contasPagarProximas.length === 0 ? (
+              <div className="text-center py-8">
+                <i className="ri-checkbox-circle-line text-4xl text-green-500 mb-3"></i>
+                <p className="text-gray-500 text-sm">Nenhuma conta próxima</p>
               </div>
             ) : (
-              <div className="space-y-2 sm:space-y-3">
-                {resumo.contasPagarProximas.slice(0, 5).map((conta) => (
-                  <div key={conta.id} className="flex items-center justify-between p-3 sm:p-3.5 bg-red-50 rounded-xl border border-red-200 hover:bg-red-100 transition-colors duration-200">
-                    <div className="flex-1 min-w-0 mr-3">
-                      <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{conta.descricao}</p>
-                      <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
-                        {format(new Date(conta.vencimento), 'dd/MM/yyyy')}
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-semibold text-red-600 text-sm sm:text-base">
-                        {formatCurrency(conta.valor)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {resumo.contasPagarProximas.length > 5 && (
-                  <div className="text-center pt-2">
-                    <button
-                      onClick={() => navigate('/contas-pagar')}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+              <div className="space-y-3">
+                {resumo.contasPagarProximas.slice(0, 2).map((conta) => {
+                  const hoje = new Date();
+                  const vencimento = new Date(conta.vencimento);
+                  const vencido = vencimento < hoje;
+                  
+                  return (
+                    <div 
+                      key={conta.id} 
+                      className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 hover:scale-102 ${
+                        vencido 
+                          ? 'bg-red-100 border-red-300' 
+                          : 'bg-red-50 border-red-200 hover:bg-red-100'
+                      }`}
                     >
-                      Ver todas ({resumo.contasPagarProximas.length}) →
-                    </button>
-                  </div>
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          vencido ? 'bg-red-200' : 'bg-red-100'
+                        }`}>
+                          <i className="ri-alert-line text-red-600 text-lg"></i>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 text-sm truncate">{conta.descricao}</p>
+                          <p className="text-xs text-gray-600 mt-0.5 flex items-center gap-1">
+                            <i className="ri-calendar-line"></i>
+                            {vencido ? 'Vencido em ' : 'Vence em '}
+                            {format(vencimento, 'dd/MM/yyyy')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0 ml-3">
+                        <p className="font-bold text-red-600 text-sm sm:text-base">
+                          {formatCurrency(conta.valor)}
+                        </p>
+                        {vencido && (
+                          <span className="text-xs text-red-600 font-medium">VENCIDO</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {resumo.contasPagarProximas.length > 2 && (
+                  <button
+                    onClick={() => navigate('/contas-pagar')}
+                    className="w-full mt-3 py-2.5 text-sm text-blue-600 hover:text-blue-800 font-medium bg-blue-50 hover:bg-blue-100 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <span>Ver todas ({resumo.contasPagarProximas.length})</span>
+                    <i className="ri-arrow-right-line"></i>
+                  </button>
                 )}
               </div>
             )}
           </div>
 
           {/* Contas a Receber */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 lg:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
-              <i className="ri-money-dollar-circle-line mr-2 text-green-600 text-xl"></i>
-              <span>Contas a Receber</span>
-              <span className="ml-auto text-xs sm:text-sm font-normal text-gray-500">(Próximas)</span>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <i className="ri-file-text-line text-xl text-green-600"></i>
+              <span>💵 Contas a Receber</span>
+              {resumo.contasReceberProximas.length > 0 && (
+                <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                  {resumo.contasReceberProximas.length}
+                </span>
+              )}
             </h3>
             
-            {loading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
-              </div>
-            ) : resumo.contasReceberProximas.length === 0 ? (
-              <div className="text-center py-6 sm:py-8">
-                <i className="ri-information-line text-3xl sm:text-4xl text-blue-500 mb-2 sm:mb-3"></i>
-                <p className="text-sm sm:text-base text-gray-500">Nenhuma conta próxima</p>
+            {resumo.contasReceberProximas.length === 0 ? (
+              <div className="text-center py-8">
+                <i className="ri-information-line text-4xl text-blue-500 mb-3"></i>
+                <p className="text-gray-500 text-sm">Nenhuma conta próxima</p>
               </div>
             ) : (
-              <div className="space-y-2 sm:space-y-3">
-                {resumo.contasReceberProximas.slice(0, 5).map((conta) => (
-                  <div key={conta.id} className="flex items-center justify-between p-3 sm:p-3.5 bg-green-50 rounded-xl border border-green-200 hover:bg-green-100 transition-colors duration-200">
-                    <div className="flex-1 min-w-0 mr-3">
-                      <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{conta.descricao}</p>
-                      <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
-                        {format(new Date(conta.vencimento), 'dd/MM/yyyy')}
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-semibold text-green-600 text-sm sm:text-base">
-                        {formatCurrency(conta.valor)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {resumo.contasReceberProximas.length > 5 && (
-                  <div className="text-center pt-2">
-                    <button
-                      onClick={() => navigate('/contas-receber')}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+              <div className="space-y-3">
+                {resumo.contasReceberProximas.slice(0, 2).map((conta) => {
+                  const hoje = new Date();
+                  const vencimento = new Date(conta.vencimento);
+                  const vencido = vencimento < hoje;
+                  
+                  return (
+                    <div 
+                      key={conta.id} 
+                      className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 hover:scale-102 ${
+                        vencido 
+                          ? 'bg-yellow-100 border-yellow-300' 
+                          : 'bg-green-50 border-green-200 hover:bg-green-100'
+                      }`}
                     >
-                      Ver todas ({resumo.contasReceberProximas.length}) →
-                    </button>
-                  </div>
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          vencido ? 'bg-yellow-200' : 'bg-green-100'
+                        }`}>
+                          <i className={`text-lg ${vencido ? 'ri-time-line text-yellow-700' : 'ri-check-line text-green-600'}`}></i>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 text-sm truncate">{conta.descricao}</p>
+                          <p className="text-xs text-gray-600 mt-0.5 flex items-center gap-1">
+                            <i className="ri-calendar-line"></i>
+                            {vencido ? 'Venceu em ' : 'Vence em '}
+                            {format(vencimento, 'dd/MM/yyyy')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0 ml-3">
+                        <p className="font-bold text-green-600 text-sm sm:text-base">
+                          {formatCurrency(conta.valor)}
+                        </p>
+                        {vencido && (
+                          <span className="text-xs text-yellow-700 font-medium">ATRASADO</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {resumo.contasReceberProximas.length > 2 && (
+                  <button
+                    onClick={() => navigate('/contas-receber')}
+                    className="w-full mt-3 py-2.5 text-sm text-blue-600 hover:text-blue-800 font-medium bg-blue-50 hover:bg-blue-100 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <span>Ver todas ({resumo.contasReceberProximas.length})</span>
+                    <i className="ri-arrow-right-line"></i>
+                  </button>
                 )}
               </div>
             )}
           </div>
         </div>
 
-        {/* Dica do Dia - RESPONSIVO */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border border-blue-200">
+        {/* Dica do Dia */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-5 border border-blue-200 animate-slideUp" style={{ animationDelay: '300ms' }}>
           <div className="flex items-start gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
               <i className="ri-lightbulb-line text-xl sm:text-2xl text-blue-600"></i>
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-blue-900 mb-1 sm:mb-2 text-sm sm:text-base">💡 Dica do Dia</h4>
-              <p className="text-blue-800 leading-relaxed text-xs sm:text-sm lg:text-base">
+              <p className="text-blue-800 leading-relaxed text-xs sm:text-sm">
                 Mantenha sempre suas receitas e despesas atualizadas para ter uma visão real da saúde 
                 financeira do seu MEI. Use a calculadora DAS para planejar seus impostos!
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Barra Flutuante Mobile - FIXED BOTTOM */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50 animate-slideUp">
+        <div className="grid grid-cols-4 gap-px bg-gray-200">
+          <button
+            onClick={() => setShowNovaReceitaModal(true)}
+            className="bg-white hover:bg-green-50 active:bg-green-100 py-3 px-2 flex flex-col items-center gap-1.5 transition-colors duration-200"
+          >
+            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+              <i className="ri-add-circle-line text-xl text-green-600"></i>
+            </div>
+            <span className="text-xs font-medium text-gray-700">Receita</span>
+          </button>
+
+          <button
+            onClick={() => setShowNovaDespesaModal(true)}
+            className="bg-white hover:bg-red-50 active:bg-red-100 py-3 px-2 flex flex-col items-center gap-1.5 transition-colors duration-200"
+          >
+            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+              <i className="ri-subtract-line text-xl text-red-600"></i>
+            </div>
+            <span className="text-xs font-medium text-gray-700">Despesa</span>
+          </button>
+
+          <button
+            onClick={() => setShowNovaContaPagarModal(true)}
+            className="bg-white hover:bg-orange-50 active:bg-orange-100 py-3 px-2 flex flex-col items-center gap-1.5 transition-colors duration-200"
+          >
+            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+              <i className="ri-file-list-line text-xl text-orange-600"></i>
+            </div>
+            <span className="text-xs font-medium text-gray-700">Pagar</span>
+          </button>
+
+          <button
+            onClick={() => setShowNovaContaReceberModal(true)}
+            className="bg-white hover:bg-blue-50 active:bg-blue-100 py-3 px-2 flex flex-col items-center gap-1.5 transition-colors duration-200"
+          >
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <i className="ri-file-text-line text-xl text-blue-600"></i>
+            </div>
+            <span className="text-xs font-medium text-gray-700">Receber</span>
+          </button>
         </div>
       </div>
 
@@ -740,6 +782,40 @@ export default function Dashboard() {
         onClose={() => setShowNovaContaReceberModal(false)}
         onSuccess={handleModalSuccess}
       />
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+        
+        .animate-slideUp {
+          animation: slideUp 0.4s ease-out forwards;
+        }
+        
+        .hover\\:scale-102:hover {
+          transform: scale(1.02);
+        }
+        
+        .hover\\:scale-105:hover {
+          transform: scale(1.05);
+        }
+      `}</style>
     </div>
   );
 }
