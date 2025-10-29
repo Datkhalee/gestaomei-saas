@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -366,75 +365,42 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Principal */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">Visão geral das suas finanças</p>
-          </div>
-          <div className="mt-4 sm:mt-0 flex flex-wrap gap-2">
-            <button
-              onClick={() => setShowNovaReceitaModal(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap flex items-center"
-            >
-              <i className="ri-add-line mr-2"></i>
-              Nova Receita
-            </button>
-            <button
-              onClick={() => setShowNovaDespesaModal(true)}
-              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors cursor-pointer whitespace-nowrap flex items-center"
-            >
-              <i className="ri-add-line mr-2"></i>
-              Nova Despesa
-            </button>
-            <button
-              onClick={() => setShowNovaContaPagarModal(true)}
-              className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors cursor-pointer whitespace-nowrap flex items-center"
-            >
-              <i className="ri-add-line mr-2"></i>
-              Conta a Pagar
-            </button>
-            <button
-              onClick={() => setShowNovaContaReceberModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap flex items-center"
-            >
-              <i className="ri-add-line mr-2"></i>
-              Conta a Receber
-            </button>
-          </div>
-        </div>
-
-        {/* Banner de Boas-vindas */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold mb-2">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        
+        {/* Banner de Boas-vindas - MOBILE FIRST */}
+        <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 rounded-2xl p-4 sm:p-6 text-white mb-4 sm:mb-6 shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">
                 Olá, {user?.nome?.split(' ')[0]}! 👋
               </h1>
-              <p className="text-blue-100">
-                Bem-vindo ao seu painel financeiro. Aqui você tem controle total do seu MEI.
+              <p className="text-blue-100 text-sm sm:text-base">
+                Bem-vindo ao seu painel financeiro
               </p>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* Status Badge - Mobile otimizado */}
+            <div className="flex items-center gap-3 sm:gap-4">
               <button
                 onClick={() => setShowNovaReceitaModal(true)}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap cursor-pointer flex items-center space-x-2"
+                className="flex-1 sm:flex-none bg-green-500 hover:bg-green-600 active:bg-green-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[44px]"
               >
-                <i className="ri-add-line"></i>
-                <span>Nova Receita</span>
+                <i className="ri-add-line text-lg"></i>
+                <span className="hidden sm:inline">Nova Receita</span>
+                <span className="sm:hidden">Receita</span>
               </button>
-              <div className="text-right">
-                <div className="text-sm text-blue-200">Status da Conta</div>
-                <div className={`font-semibold ${
+              
+              <div className="hidden sm:block text-right bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                <div className="text-xs text-blue-200 mb-0.5">Status</div>
+                <div className={`text-sm font-semibold ${
                   user?.status_assinatura === 'trial' ? 'text-yellow-200' :
                   user?.status_assinatura === 'ativo' ? 'text-green-200' : 'text-red-200'
                 }`}>
@@ -449,109 +415,172 @@ export default function Dashboard() {
         {/* Alertas MEI */}
         <MEIAlerts />
 
-        {/* Cards de Resumo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        {/* Botões de Ação Rápida - MOBILE */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6 lg:hidden">
+          <button
+            onClick={() => setShowNovaReceitaModal(true)}
+            className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-3 py-3 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[56px]"
+          >
+            <i className="ri-add-circle-line text-xl"></i>
+            <span>Receita</span>
+          </button>
+          <button
+            onClick={() => setShowNovaDespesaModal(true)}
+            className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-3 py-3 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[56px]"
+          >
+            <i className="ri-subtract-line text-xl"></i>
+            <span>Despesa</span>
+          </button>
+          <button
+            onClick={() => setShowNovaContaPagarModal(true)}
+            className="bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white px-3 py-3 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[56px]"
+          >
+            <i className="ri-file-list-line text-xl"></i>
+            <span>Pagar</span>
+          </button>
+          <button
+            onClick={() => setShowNovaContaReceberModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-3 py-3 rounded-xl font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 min-h-[56px]"
+          >
+            <i className="ri-file-text-line text-xl"></i>
+            <span>Receber</span>
+          </button>
+        </div>
+
+        {/* Botões de Ação - DESKTOP/TABLET */}
+        <div className="hidden lg:flex flex-wrap gap-3 mb-6">
+          <button
+            onClick={() => setShowNovaReceitaModal(true)}
+            className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <i className="ri-add-line text-lg"></i>
+            Nova Receita
+          </button>
+          <button
+            onClick={() => setShowNovaDespesaModal(true)}
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <i className="ri-add-line text-lg"></i>
+            Nova Despesa
+          </button>
+          <button
+            onClick={() => setShowNovaContaPagarModal(true)}
+            className="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <i className="ri-add-line text-lg"></i>
+            Conta a Pagar
+          </button>
+          <button
+            onClick={() => setShowNovaContaReceberModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <i className="ri-add-line text-lg"></i>
+            Conta a Receber
+          </button>
+        </div>
+
+        {/* Cards de Resumo - RESPONSIVO */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
           {/* Receitas do Mês */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Receitas do Mês</p>
-                <p className="text-2xl font-bold text-green-600">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 p-4 sm:p-5 lg:p-6">
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Receitas do Mês</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 leading-tight">
                   {loading ? '...' : formatCurrency(resumo.receitasMes)}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <i className="ri-arrow-up-line text-2xl text-green-600"></i>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i className="ri-arrow-up-line text-xl sm:text-2xl text-green-600"></i>
               </div>
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-500">
+            <div className="flex items-center text-xs sm:text-sm">
+              <span className="text-gray-500 truncate">
                 {resumo.receitasMes > resumo.receitasMesAnterior ? '📈' : '📉'} 
                 {resumo.receitasMes > 0 ? 
                   ` ${((resumo.receitasMes - resumo.receitasMesAnterior) / Math.max(resumo.receitasMesAnterior, 1) * 100).toFixed(1)}%` : 
-                  ' 0%'}
-                vs mês anterior
+                  ' 0%'} vs anterior
               </span>
             </div>
           </div>
 
           {/* Despesas do Mês */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Despesas do Mês</p>
-                <p className="text-2xl font-bold text-red-600">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 p-4 sm:p-5 lg:p-6">
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Despesas do Mês</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 leading-tight">
                   {loading ? '...' : formatCurrency(resumo.despesasMes)}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                <i className="ri-arrow-down-line text-2xl text-red-600"></i>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i className="ri-arrow-down-line text-xl sm:text-2xl text-red-600"></i>
               </div>
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-500">
+            <div className="flex items-center text-xs sm:text-sm">
+              <span className="text-gray-500 truncate">
                 {resumo.despesasMes > resumo.despesasMesAnterior ? '📈' : '📉'} 
                 {resumo.despesasMes > 0 ? 
                   ` ${((resumo.despesasMes - resumo.despesasMesAnterior) / Math.max(resumo.despesasMesAnterior, 1) * 100).toFixed(1)}%` : 
-                  ' 0%'}
-                vs mês anterior
+                  ' 0%'} vs anterior
               </span>
             </div>
           </div>
 
           {/* Lucro do Mês */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Lucro do Mês</p>
-                <p className={`text-2xl font-bold ${resumo.lucroMes >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 p-4 sm:p-5 lg:p-6">
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Lucro do Mês</p>
+                <p className={`text-xl sm:text-2xl lg:text-3xl font-bold leading-tight ${resumo.lucroMes >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
                   {loading ? '...' : formatCurrency(resumo.lucroMes)}
                 </p>
               </div>
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
                 resumo.lucroMes >= 0 ? 'bg-blue-100' : 'bg-orange-100'
               }`}>
-                <i className={`ri-line-chart-line text-2xl ${
+                <i className={`ri-line-chart-line text-xl sm:text-2xl ${
                   resumo.lucroMes >= 0 ? 'text-blue-600' : 'text-orange-600'
                 }`}></i>
               </div>
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-500">
+            <div className="flex items-center text-xs sm:text-sm">
+              <span className="text-gray-500 truncate">
                 {resumo.lucroMes >= 0 ? '💰 Lucro' : '⚠️ Prejuízo'} este mês
               </span>
             </div>
           </div>
 
           {/* Faturamento Anual */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Faturamento Anual</p>
-                <p className="text-2xl font-bold text-purple-600">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 p-4 sm:p-5 lg:p-6">
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Faturamento Anual</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600 leading-tight">
                   {loading ? '...' : formatCurrency(resumo.faturamentoAnual)}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <i className="ri-bar-chart-line text-2xl text-purple-600"></i>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i className="ri-bar-chart-line text-xl sm:text-2xl text-purple-600"></i>
               </div>
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-500">
+            <div className="flex items-center text-xs sm:text-sm">
+              <span className="text-gray-500 truncate">
                 📊 {((resumo.faturamentoAnual / 81000) * 100).toFixed(1)}% do limite MEI
               </span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+        {/* Gráfico e Ações Rápidas */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
           {/* Gráfico Financeiro */}
           <div className="xl:col-span-2">
             <FinancialChart />
           </div>
 
-          {/* Ações Rápidas */}
-          <div>
+          {/* Ações Rápidas - Desktop */}
+          <div className="hidden lg:block">
             <QuickActions 
               onNovaReceita={() => setShowNovaReceitaModal(true)}
               onNovaDespesa={() => setShowNovaDespesaModal(true)}
@@ -561,13 +590,14 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Contas Próximas do Vencimento */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Contas Próximas do Vencimento - RESPONSIVO */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
           {/* Contas a Pagar */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <i className="ri-money-dollar-circle-line mr-2 text-red-600"></i>
-              Contas a Pagar (Próximas)
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 lg:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
+              <i className="ri-money-dollar-circle-line mr-2 text-red-600 text-xl"></i>
+              <span>Contas a Pagar</span>
+              <span className="ml-auto text-xs sm:text-sm font-normal text-gray-500">(Próximas)</span>
             </h3>
             
             {loading ? (
@@ -580,22 +610,22 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : resumo.contasPagarProximas.length === 0 ? (
-              <div className="text-center py-8">
-                <i className="ri-checkbox-circle-line text-4xl text-green-500 mb-3"></i>
-                <p className="text-gray-500">Nenhuma conta próxima do vencimento</p>
+              <div className="text-center py-6 sm:py-8">
+                <i className="ri-checkbox-circle-line text-3xl sm:text-4xl text-green-500 mb-2 sm:mb-3"></i>
+                <p className="text-sm sm:text-base text-gray-500">Nenhuma conta próxima</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {resumo.contasPagarProximas.slice(0, 5).map((conta) => (
-                  <div key={conta.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">{conta.descricao}</p>
-                      <p className="text-sm text-gray-600">
-                        Vence em {format(new Date(conta.vencimento), 'dd/MM/yyyy')}
+                  <div key={conta.id} className="flex items-center justify-between p-3 sm:p-3.5 bg-red-50 rounded-xl border border-red-200 hover:bg-red-100 transition-colors duration-200">
+                    <div className="flex-1 min-w-0 mr-3">
+                      <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{conta.descricao}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
+                        {format(new Date(conta.vencimento), 'dd/MM/yyyy')}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-red-600">
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-semibold text-red-600 text-sm sm:text-base">
                         {formatCurrency(conta.valor)}
                       </p>
                     </div>
@@ -605,7 +635,7 @@ export default function Dashboard() {
                   <div className="text-center pt-2">
                     <button
                       onClick={() => navigate('/contas-pagar')}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer whitespace-nowrap"
+                      className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
                     >
                       Ver todas ({resumo.contasPagarProximas.length}) →
                     </button>
@@ -616,10 +646,11 @@ export default function Dashboard() {
           </div>
 
           {/* Contas a Receber */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <i className="ri-money-dollar-circle-line mr-2 text-green-600"></i>
-              Contas a Receber (Próximas)
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 lg:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
+              <i className="ri-money-dollar-circle-line mr-2 text-green-600 text-xl"></i>
+              <span>Contas a Receber</span>
+              <span className="ml-auto text-xs sm:text-sm font-normal text-gray-500">(Próximas)</span>
             </h3>
             
             {loading ? (
@@ -632,22 +663,22 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : resumo.contasReceberProximas.length === 0 ? (
-              <div className="text-center py-8">
-                <i className="ri-information-line text-4xl text-blue-500 mb-3"></i>
-                <p className="text-gray-500">Nenhuma conta próxima do vencimento</p>
+              <div className="text-center py-6 sm:py-8">
+                <i className="ri-information-line text-3xl sm:text-4xl text-blue-500 mb-2 sm:mb-3"></i>
+                <p className="text-sm sm:text-base text-gray-500">Nenhuma conta próxima</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {resumo.contasReceberProximas.slice(0, 5).map((conta) => (
-                  <div key={conta.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">{conta.descricao}</p>
-                      <p className="text-sm text-gray-600">
-                        Vence em {format(new Date(conta.vencimento), 'dd/MM/yyyy')}
+                  <div key={conta.id} className="flex items-center justify-between p-3 sm:p-3.5 bg-green-50 rounded-xl border border-green-200 hover:bg-green-100 transition-colors duration-200">
+                    <div className="flex-1 min-w-0 mr-3">
+                      <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{conta.descricao}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
+                        {format(new Date(conta.vencimento), 'dd/MM/yyyy')}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-green-600">
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-semibold text-green-600 text-sm sm:text-base">
                         {formatCurrency(conta.valor)}
                       </p>
                     </div>
@@ -657,7 +688,7 @@ export default function Dashboard() {
                   <div className="text-center pt-2">
                     <button
                       onClick={() => navigate('/contas-receber')}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer whitespace-nowrap"
+                      className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
                     >
                       Ver todas ({resumo.contasReceberProximas.length}) →
                     </button>
@@ -668,18 +699,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Rodapé com Dicas */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
-          <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <i className="ri-lightbulb-line text-2xl text-blue-600"></i>
+        {/* Dica do Dia - RESPONSIVO */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border border-blue-200">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <i className="ri-lightbulb-line text-xl sm:text-2xl text-blue-600"></i>
             </div>
-            <div>
-              <h4 className="font-semibold text-blue-900 mb-2">💡 Dica do Dia</h4>
-              <p className="text-blue-800 leading-relaxed">
+            <div className="flex-1">
+              <h4 className="font-semibold text-blue-900 mb-1 sm:mb-2 text-sm sm:text-base">💡 Dica do Dia</h4>
+              <p className="text-blue-800 leading-relaxed text-xs sm:text-sm lg:text-base">
                 Mantenha sempre suas receitas e despesas atualizadas para ter uma visão real da saúde 
-                financeira do seu MEI. Use a calculadora DAS para planejar seus impostos e nunca perca 
-                prazos importantes!
+                financeira do seu MEI. Use a calculadora DAS para planejar seus impostos!
               </p>
             </div>
           </div>
