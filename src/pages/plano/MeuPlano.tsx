@@ -1,10 +1,25 @@
-
 import { useAuth } from '../../contexts/AuthContext';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useEffect } from 'react';
 
 export default function MeuPlano() {
   const { user } = useAuth();
+
+  useEffect(() => {
+    // 🎯 EVENTO FACEBOOK PIXEL - INITIATE CHECKOUT
+    if (typeof window !== 'undefined' && window.fbq && user) {
+      if (user.status_assinatura === 'trial' || user.status_assinatura === 'expired') {
+        window.fbq('track', 'InitiateCheckout', {
+          content_name: 'Plano Full FinanceMEI',
+          content_category: 'Subscription',
+          value: 27.00,
+          currency: 'BRL',
+          user_email: user.email
+        });
+      }
+    }
+  }, [user]);
 
   if (!user) return null;
 
@@ -154,15 +169,29 @@ export default function MeuPlano() {
     return null;
   };
 
+  const handleCheckoutClick = () => {
+    // 🎯 EVENTO FACEBOOK PIXEL - ADD TO CART (interesse em compra)
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'AddToCart', {
+        content_name: 'Clique Checkout FinanceMEI',
+        content_category: 'Checkout Interest',
+        value: 27.00,
+        currency: 'BRL',
+        user_email: user.email
+      });
+    }
+  };
+
   const getActionButton = () => {
     const baseClasses = "w-full lg:w-auto px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-bold rounded-xl transition-all duration-200 cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1";
     
     if (isTrial || isExpirado) {
       return (
-        <a
+        
           href="https://pay.cakto.com.br/38pmmdm_618893"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleCheckoutClick}
           className={`${baseClasses} ${
             isExpirado 
               ? 'bg-red-600 hover:bg-red-700 text-white' 
@@ -177,7 +206,7 @@ export default function MeuPlano() {
 
     if (isAtivo) {
       return (
-        <a
+        
           href="https://pay.cakto.com.br/38pmmdm_618893"
           target="_blank"
           rel="noopener noreferrer"
@@ -191,10 +220,11 @@ export default function MeuPlano() {
 
     if (isCancelado) {
       return (
-        <a
+        
           href="https://pay.cakto.com.br/38pmmdm_618893"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleCheckoutClick}
           className={`${baseClasses} bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white`}
         >
           <i className="ri-restart-line text-xl"></i>
