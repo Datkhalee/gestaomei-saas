@@ -24,7 +24,7 @@ export default function CalculadoraDAS() {
   const LIMITE_MEI_2024 = 81000;
   const DAS_VALORES = {
     comercio: 71.60,
-    servicos: 71.60,
+    servicos: 75.60, // ✅ CORRIGIDO: era 71.60, agora é 75.60
     comercio_servicos: 76.60
   };
 
@@ -202,6 +202,136 @@ export default function CalculadoraDAS() {
         </p>
       </div>
 
+      {/* 🆕 SEÇÃO EXPLICATIVA - DAS vs TAXAS MUNICIPAIS */}
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border-2 border-purple-300 p-6">
+        <h3 className="text-xl font-bold text-purple-900 mb-4 flex items-center">
+          <i className="ri-question-line mr-2 text-2xl"></i>
+          💡 Entenda a diferença: DAS MEI vs Taxas Municipais
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* DAS MEI */}
+          <div className="bg-white rounded-lg p-5 border-2 border-blue-300">
+            <div className="flex items-start space-x-3 mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i className="ri-calendar-line text-2xl text-blue-600"></i>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-blue-900 text-lg mb-1">DAS MEI (Mensal)</h4>
+                <p className="text-sm text-blue-600 font-medium">Pagamento Obrigatório Todo Mês</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex items-start space-x-2">
+                <i className="ri-check-line text-green-600 mt-1"></i>
+                <p className="text-gray-700"><strong>O que é:</strong> Imposto mensal fixo do MEI</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <i className="ri-check-line text-green-600 mt-1"></i>
+                <p className="text-gray-700"><strong>Valor:</strong> R$ 71,60 a R$ 76,60/mês</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <i className="ri-check-line text-green-600 mt-1"></i>
+                <p className="text-gray-700"><strong>Vencimento:</strong> Todo dia 20 do mês</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <i className="ri-check-line text-green-600 mt-1"></i>
+                <p className="text-gray-700"><strong>Obrigatório:</strong> SIM, mesmo sem faturar</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <i className="ri-check-line text-green-600 mt-1"></i>
+                <p className="text-gray-700"><strong>Para que serve:</strong> INSS (aposentadoria, auxílios) + impostos</p>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-xs text-blue-800 font-medium">
+                📌 Este valor é calculado nesta página
+              </p>
+            </div>
+          </div>
+
+          {/* Taxas Municipais */}
+          <div className="bg-white rounded-lg p-5 border-2 border-orange-300">
+            <div className="flex items-start space-x-3 mb-3">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i className="ri-file-text-line text-2xl text-orange-600"></i>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-orange-900 text-lg mb-1">Taxas para Nota Fiscal</h4>
+                <p className="text-sm text-orange-600 font-medium">Pagamento Único ou Anual</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex items-start space-x-2">
+                <i className="ri-arrow-right-line text-orange-600 mt-1"></i>
+                <p className="text-gray-700"><strong>O que é:</strong> Taxa da prefeitura para emitir nota</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <i className="ri-arrow-right-line text-orange-600 mt-1"></i>
+                <p className="text-gray-700"><strong>Valor:</strong> Varia por cidade (R$ 0 até R$ 500+)</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <i className="ri-arrow-right-line text-orange-600 mt-1"></i>
+                <p className="text-gray-700"><strong>Frequência:</strong> Única, anual ou isenta (depende da cidade)</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <i className="ri-arrow-right-line text-orange-600 mt-1"></i>
+                <p className="text-gray-700"><strong>Obrigatório:</strong> Apenas se for emitir nota fiscal</p>
+              </div>
+              <div className="flex items-start space-x-2">
+                <i className="ri-arrow-right-line text-orange-600 mt-1"></i>
+                <p className="text-gray-700"><strong>Para que serve:</strong> Liberar sistema de nota fiscal eletrônica</p>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
+              <p className="text-xs text-orange-800 font-medium">
+                📌 Consulte a prefeitura da sua cidade
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Exemplo Prático */}
+        <div className="mt-6 bg-white rounded-lg p-5 border-2 border-green-300">
+          <h4 className="font-bold text-green-900 mb-3 flex items-center">
+            <i className="ri-lightbulb-line mr-2 text-green-600"></i>
+            Exemplo Prático: Quanto o MEI paga?
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="space-y-2">
+              <p className="font-medium text-gray-900">📅 Todo Mês:</p>
+              <p className="text-2xl font-bold text-blue-600">R$ 71,60 - R$ 76,60</p>
+              <p className="text-xs text-gray-600">DAS MEI (obrigatório)</p>
+            </div>
+            <div className="space-y-2">
+              <p className="font-medium text-gray-900">📄 Para Nota Fiscal:</p>
+              <p className="text-2xl font-bold text-orange-600">R$ 0 - R$ 500+</p>
+              <p className="text-xs text-gray-600">Taxa municipal (varia por cidade)</p>
+            </div>
+            <div className="space-y-2">
+              <p className="font-medium text-gray-900">💰 Total Ano (sem nota):</p>
+              <p className="text-2xl font-bold text-purple-600">R$ 859 - R$ 919</p>
+              <p className="text-xs text-gray-600">Apenas DAS x 12 meses</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Alerta Importante */}
+        <div className="mt-4 bg-yellow-50 rounded-lg p-4 border border-yellow-300">
+          <div className="flex items-start space-x-3">
+            <i className="ri-error-warning-line text-yellow-600 text-xl mt-1"></i>
+            <div className="text-sm text-yellow-800">
+              <p className="font-semibold mb-1">⚠️ Importante:</p>
+              <p>O <strong>DAS MEI é SEMPRE obrigatório</strong>, mesmo que você não emita nota fiscal. Já a <strong>taxa municipal é opcional</strong> e só precisa ser paga se você for emitir nota fiscal eletrônica.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Formulário Principal */}
         <div className="xl:col-span-2 space-y-6">
@@ -245,7 +375,7 @@ export default function CalculadoraDAS() {
                     <div className="text-center">
                       <i className="ri-tools-line text-2xl mb-2 block"></i>
                       <div className="font-medium">Serviços</div>
-                      <div className="text-sm text-gray-500">R$ 71,60/mês*</div>
+                      <div className="text-sm text-gray-500">R$ 75,60/mês*</div>
                     </div>
                   </button>
                   
