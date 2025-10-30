@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { format, startOfYear, endOfYear } from 'date-fns';
+import { format, startOfYear, endOfYear } from 'date-fns'; 
 
 interface CalculoResult {
   valorDAS: number;
