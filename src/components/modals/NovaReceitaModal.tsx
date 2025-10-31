@@ -13,12 +13,11 @@ interface FormData {
   valor: string;
   data: string;
   categoria: string;
-  recebido: boolean;
   data_recebimento: string;
 }
 
 const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const { user } = useAuth(); // ✅ USAR O CONTEXTO CORRETO
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState<FormData>({
@@ -26,8 +25,7 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
     valor: '',
     data: new Date().toISOString().split('T')[0],
     categoria: 'Venda Produtos',
-    recebido: false,
-    data_recebimento: ''
+    data_recebimento: new Date().toISOString().split('T')[0] // ✅ Default = hoje
   });
 
   if (!isOpen) return null;
@@ -60,8 +58,8 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
         valor: parseFloat(formData.valor),
         data: formData.data,
         categoria: formData.categoria,
-        recebido: formData.recebido,
-        data_recebimento: formData.recebido ? formData.data_recebimento : null
+        recebido: true, // ✅ SEMPRE TRUE - já recebeu
+        data_recebimento: formData.data_recebimento
       };
 
       const { error: insertError } = await supabase
@@ -79,8 +77,7 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
         valor: '',
         data: new Date().toISOString().split('T')[0],
         categoria: 'Venda Produtos',
-        recebido: false,
-        data_recebimento: ''
+        data_recebimento: new Date().toISOString().split('T')[0]
       });
 
       onSuccess();
@@ -94,33 +91,31 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({
-        ...prev,
-        [name]: checked
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Nova Receita</h2>
+          <h2 className="text-xl font-semibold text-gray-800">💵 Recebi Dinheiro</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
             <i className="ri-close-line text-xl"></i>
           </button>
+        </div>
+
+        {/* ✅ INFO BOX */}
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm text-green-800">
+            <strong>📌 Use este formulário apenas para dinheiro que JÁ entrou no seu caixa.</strong>
+          </p>
         </div>
 
         {error && (
@@ -142,7 +137,7 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
               required
               disabled={loading}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Ex: Venda de produto"
+              placeholder="Ex: Corte + Escova - Cliente Ana"
             />
           </div>
 
@@ -166,12 +161,27 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Data *
+              Data do Serviço *
             </label>
             <input
               type="date"
               name="data"
               value={formData.data}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Data que Recebi *
+            </label>
+            <input
+              type="date"
+              name="data_recebimento"
+              value={formData.data_recebimento}
               onChange={handleChange}
               required
               disabled={loading}
@@ -196,38 +206,6 @@ const NovaReceitaModal: React.FC<NovaReceitaModalProps> = ({ isOpen, onClose, on
               <option value="Outras">Outras</option>
             </select>
           </div>
-
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="recebido"
-              name="recebido"
-              checked={formData.recebido}
-              onChange={handleChange}
-              disabled={loading}
-              className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
-            />
-            <label htmlFor="recebido" className="text-sm font-medium text-gray-700 cursor-pointer">
-              Já foi recebido?
-            </label>
-          </div>
-
-          {formData.recebido && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Data de Recebimento *
-              </label>
-              <input
-                type="date"
-                name="data_recebimento"
-                value={formData.data_recebimento}
-                onChange={handleChange}
-                required={formData.recebido}
-                disabled={loading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-          )}
 
           <div className="flex gap-3 pt-4">
             <button
