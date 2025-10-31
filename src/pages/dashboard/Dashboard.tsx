@@ -106,7 +106,6 @@ export default function Dashboard() {
       const mesAnterior = startOfMonth(subMonths(hoje, 1));
       const fimMesAnterior = endOfMonth(subMonths(hoje, 1));
 
-      // ✅ APENAS RECEITAS JÁ RECEBIDAS
       const { data: receitasMesAtual } = await supabase
         .from('receitas')
         .select('valor')
@@ -123,7 +122,6 @@ export default function Dashboard() {
         .gte('data', format(mesAnterior, 'yyyy-MM-dd'))
         .lte('data', format(fimMesAnterior, 'yyyy-MM-dd'));
 
-      // ✅ APENAS DESPESAS JÁ PAGAS
       const { data: despesasMesAtual } = await supabase
         .from('despesas')
         .select('valor')
@@ -144,7 +142,6 @@ export default function Dashboard() {
       const inicioAno = new Date(anoAtual, 0, 1);
       const fimAno = new Date(anoAtual, 11, 31);
 
-      // ✅ FATURAMENTO = APENAS RECEBIDAS
       const { data: receitasAno } = await supabase
         .from('receitas')
         .select('valor')
@@ -201,7 +198,6 @@ export default function Dashboard() {
     const endDate = endOfMonth(currentMonth);
 
     try {
-      // ✅ APENAS RECEITAS RECEBIDAS
       const { data: receitas } = await supabase
         .from('receitas')
         .select('*')
@@ -210,7 +206,6 @@ export default function Dashboard() {
         .gte('data', format(startDate, 'yyyy-MM-dd'))
         .lte('data', format(endDate, 'yyyy-MM-dd'));
 
-      // ✅ APENAS DESPESAS PAGAS
       const { data: despesas } = await supabase
         .from('despesas')
         .select('*')
@@ -255,7 +250,6 @@ export default function Dashboard() {
     const startYear = new Date(currentYear, 0, 1);
     const endYear = new Date(currentYear, 11, 31);
 
-    // ✅ APENAS RECEITAS RECEBIDAS
     const { data: receitas } = await supabase
       .from('receitas')
       .select('valor')
@@ -309,7 +303,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 lg:pb-8">
+    <div className="min-h-screen bg-gray-50 pb-32 lg:pb-8">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
         
         <div className="flex justify-end items-center gap-3 mb-2 sm:mb-3">
@@ -389,7 +383,6 @@ export default function Dashboard() {
           <MEIAlerts />
         </div>
 
-        {/* 🔥 BOTÕES COM LABELS MELHORADOS */}
         <div className="hidden md:grid grid-cols-2 xl:grid-cols-4 gap-8 lg:gap-12 mb-5 animate-fadeIn">
           <button
             onClick={() => setShowNovaReceitaModal(true)}
@@ -452,7 +445,6 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Cards (resto do código igual...) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-5 animate-slideUp">
           <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-4 sm:p-5 group hover:scale-105">
             <div className="flex items-start justify-between mb-3">
@@ -739,8 +731,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 🔥 MOBILE BAR COM LABELS MELHORADOS */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50 animate-slideUp">
+      {/* 🔥 MOBILE BAR - AGORA COM PADDING EXTRA */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50 animate-slideUp pb-safe">
         <div className="grid grid-cols-4 gap-px bg-gray-200">
           <button
             onClick={() => setShowNovaReceitaModal(true)}
@@ -840,9 +832,13 @@ export default function Dashboard() {
         .hover\\:scale-105:hover {
           transform: scale(1.05);
         }
+
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
       `}</style>
 
-      <footer className="mt-8 pt-6 border-t border-gray-200 text-center">
+      <footer className="mt-8 pt-6 border-t border-gray-200 text-center pb-4">
         <p className="text-sm text-gray-600">
           © {new Date().getFullYear()} SaaS desenvolvido por{' '}
           <a 
