@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase, ContaPagar } from '../../lib/supabase';
@@ -81,7 +80,10 @@ export default function ContasPagar() {
   const handleMarcarPago = async (id: string) => {
     const { error } = await supabase
       .from('contas_pagar')
-      .update({ pago: true })
+      .update({ 
+        pago: true,
+        data_pagamento: new Date().toISOString().split('T')[0]
+      })
       .eq('id', id);
 
     if (!error) {
@@ -155,13 +157,13 @@ export default function ContasPagar() {
       <TrialBanner />
 
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Contas a Pagar</h1>
+        <h1 className="text-3xl font-bold text-gray-900">📋 Tenho que Pagar</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
+          className="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
         >
           <i className="ri-add-line text-xl"></i>
-          Nova Conta
+          Tenho que Pagar
         </button>
       </div>
 
@@ -201,7 +203,7 @@ export default function ContasPagar() {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">Total a Pagar</p>
-            <p className="text-2xl font-bold text-red-600">
+            <p className="text-2xl font-bold text-orange-600">
               R$ {totalAPagar.toFixed(2).replace('.', ',')}
             </p>
           </div>
@@ -226,7 +228,7 @@ export default function ContasPagar() {
               </div>
 
               <div className="mb-4">
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-2xl font-bold text-orange-600">
                   R$ {Number(conta.valor).toFixed(2).replace('.', ',')}
                 </p>
               </div>
@@ -260,7 +262,7 @@ export default function ContasPagar() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Nova Conta a Pagar</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">📋 Tenho que Pagar</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
@@ -268,9 +270,10 @@ export default function ContasPagar() {
                   type="text"
                   value={formData.descricao}
                   onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
                   required
                   disabled={saving}
+                  placeholder="Ex: Aluguel do salão"
                 />
               </div>
               <div>
@@ -281,7 +284,7 @@ export default function ContasPagar() {
                   min="0.01"
                   value={formData.valor}
                   onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
                   required
                   disabled={saving}
                 />
@@ -292,7 +295,7 @@ export default function ContasPagar() {
                   type="date"
                   value={formData.vencimento}
                   onChange={(e) => setFormData({ ...formData, vencimento: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
                   required
                   disabled={saving}
                 />
@@ -302,25 +305,28 @@ export default function ContasPagar() {
                 <select
                   value={formData.categoria}
                   onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                  className="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
+                  className="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none cursor-pointer"
                   required
                   disabled={saving}
                 >
-                  <option value="Fornecedores">Fornecedores</option>
                   <option value="Aluguel">Aluguel</option>
-                  <option value="Água/Luz">Água/Luz</option>
+                  <option value="Energia">Energia</option>
+                  <option value="Água">Água</option>
                   <option value="Internet">Internet</option>
-                  <option value="Produtos">Produtos</option>
-                  <option value="Combustível">Combustível</option>
+                  <option value="Telefone">Telefone</option>
+                  <option value="Impostos">Impostos</option>
+                  <option value="Empréstimos">Empréstimos</option>
+                  <option value="Fornecedores">Fornecedores</option>
+                  <option value="Equipamentos">Equipamentos</option>
                   <option value="Marketing">Marketing</option>
-                  <option value="Outras">Outras</option>
+                  <option value="Outros">Outros</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Salvando...' : 'Salvar'}
                 </button>
