@@ -4,13 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import WelcomeModal from '../../components/modals/WelcomeModal';
 import WhatsAppButton from '../../components/layout/WhatsAppButton';
 
-// Declarar fbq para TypeScript
-declare global {
-  interface Window {
-    fbq?: (action: string, event: string, params?: any) => void;
-  }
-}
-
 export default function Cadastro() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -41,29 +34,22 @@ export default function Cadastro() {
     setLoading(true);
 
     try {
-      // ✅ 1. CADASTRAR NO SUPABASE PRIMEIRO
       await signUp(nome, email, senha);
       
-      // ✅ 2. SÓ DEPOIS QUE SALVOU - DISPARA O PIXEL CORRETO
+      // 🎯 EVENTO FACEBOOK PIXEL - LEAD
       if (typeof window !== 'undefined' && window.fbq) {
-        window.fbq('track', 'CompleteRegistration', {
-          content_name: 'Cadastro Completo FinanceMEI',
-          content_category: 'signup',
-          status: 'completed',
+        window.fbq('track', 'Lead', {
+          content_name: 'Cadastro Trial FinanceMEI',
+          content_category: 'Trial Signup',
           value: 27.00,
-          currency: 'BRL'
+          currency: 'BRL',
+          user_email: email
         });
-        
-        console.log('✅ Meta Pixel: CompleteRegistration disparado com sucesso!');
       }
 
-      // ✅ 3. MOSTRAR MODAL DE BOAS-VINDAS
       setShowWelcome(true);
-      
     } catch (err: any) {
-      console.error('❌ Erro no cadastro:', err);
       setError(err.message || 'Erro ao criar conta');
-      // ❌ NÃO DISPARA O PIXEL SE DEU ERRO!
     } finally {
       setLoading(false);
     }
