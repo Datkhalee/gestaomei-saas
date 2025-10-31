@@ -144,7 +144,7 @@ export default function ContasPagar() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="flex items-center justify-center h-screen">
           <i className="ri-loader-4-line text-4xl text-blue-600 animate-spin"></i>
         </div>
@@ -153,26 +153,26 @@ export default function ContasPagar() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8 pb-32 lg:pb-8">
       <TrialBanner />
 
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">📋 Tenho que Pagar</h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">📋 Tenho que Pagar</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
         >
-          <i className="ri-add-line text-xl"></i>
-          Tenho que Pagar
+          <i className="ri-add-line text-lg sm:text-xl"></i>
+          <span>Tenho que Pagar</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-3">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100 mb-6">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
               onClick={() => setFiltro('todas')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap text-sm ${
                 filtro === 'todas'
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -182,7 +182,7 @@ export default function ContasPagar() {
             </button>
             <button
               onClick={() => setFiltro('vencidas')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap text-sm ${
                 filtro === 'vencidas'
                   ? 'bg-red-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -192,7 +192,7 @@ export default function ContasPagar() {
             </button>
             <button
               onClick={() => setFiltro('proximas')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap text-sm ${
                 filtro === 'proximas'
                   ? 'bg-orange-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -201,39 +201,39 @@ export default function ContasPagar() {
               Próximas (7 dias)
             </button>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600">Total a Pagar</p>
-            <p className="text-2xl font-bold text-orange-600">
+          <div className="text-center sm:text-right bg-orange-50 p-3 rounded-lg">
+            <p className="text-xs sm:text-sm text-gray-600 mb-1">Total a Pagar</p>
+            <p className="text-xl sm:text-2xl font-bold text-orange-600">
               R$ {totalAPagar.toFixed(2).replace('.', ',')}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {contasFiltradas.length > 0 ? (
           contasFiltradas.map((conta) => (
-            <div key={conta.id} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div key={conta.id} className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
               <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1">{conta.descricao}</h3>
-                  <p className="text-sm text-gray-500">{conta.categoria}</p>
+                <div className="flex-1 pr-2">
+                  <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base break-words">{conta.descricao}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500">{conta.categoria}</p>
                 </div>
                 <button
                   onClick={() => handleDelete(conta.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer flex-shrink-0"
                 >
-                  <i className="ri-delete-bin-line text-lg w-5 h-5 flex items-center justify-center"></i>
+                  <i className="ri-delete-bin-line text-base sm:text-lg"></i>
                 </button>
               </div>
 
               <div className="mb-4">
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-xl sm:text-2xl font-bold text-orange-600">
                   R$ {Number(conta.valor).toFixed(2).replace('.', ',')}
                 </p>
               </div>
 
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
                 <div>
                   <p className="text-xs text-gray-500">Vencimento</p>
                   <p className="text-sm font-medium text-gray-900">
@@ -245,7 +245,7 @@ export default function ContasPagar() {
 
               <button
                 onClick={() => handleMarcarPago(conta.id)}
-                className="w-full py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap"
+                className="w-full py-2 sm:py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap text-sm sm:text-base"
               >
                 Marcar como Pago
               </button>
@@ -253,16 +253,16 @@ export default function ContasPagar() {
           ))
         ) : (
           <div className="col-span-full text-center py-12">
-            <i className="ri-file-list-3-line text-6xl text-gray-300 mb-4"></i>
-            <p className="text-gray-400">Nenhuma conta a pagar encontrada</p>
+            <i className="ri-file-list-3-line text-4xl sm:text-6xl text-gray-300 mb-4"></i>
+            <p className="text-gray-400 text-sm sm:text-base">Nenhuma conta a pagar encontrada</p>
           </div>
         )}
       </div>
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">📋 Tenho que Pagar</h2>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">📋 Tenho que Pagar</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
@@ -270,7 +270,7 @@ export default function ContasPagar() {
                   type="text"
                   value={formData.descricao}
                   onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm sm:text-base"
                   required
                   disabled={saving}
                   placeholder="Ex: Aluguel do salão"
@@ -284,7 +284,7 @@ export default function ContasPagar() {
                   min="0.01"
                   value={formData.valor}
                   onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm sm:text-base"
                   required
                   disabled={saving}
                 />
@@ -295,7 +295,7 @@ export default function ContasPagar() {
                   type="date"
                   value={formData.vencimento}
                   onChange={(e) => setFormData({ ...formData, vencimento: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm sm:text-base"
                   required
                   disabled={saving}
                 />
@@ -305,7 +305,7 @@ export default function ContasPagar() {
                 <select
                   value={formData.categoria}
                   onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                  className="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none cursor-pointer"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none cursor-pointer text-sm sm:text-base"
                   required
                   disabled={saving}
                 >
@@ -322,11 +322,11 @@ export default function ContasPagar() {
                   <option value="Outros">Outros</option>
                 </select>
               </div>
-              <div className="flex gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-2.5 sm:py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
                   {saving ? 'Salvando...' : 'Salvar'}
                 </button>
@@ -334,7 +334,7 @@ export default function ContasPagar() {
                   type="button"
                   onClick={() => setShowModal(false)}
                   disabled={saving}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50"
+                  className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50 text-sm sm:text-base"
                 >
                   Cancelar
                 </button>
