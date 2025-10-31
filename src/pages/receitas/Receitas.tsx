@@ -25,12 +25,11 @@ export default function Receitas() {
   const loadReceitas = async () => {
     if (!user) return;
 
-    // ✅ FILTRAR APENAS RECEITAS RECEBIDAS
     const { data, error } = await supabase
       .from('receitas')
       .select('*')
       .eq('user_id', user.id)
-      .eq('recebido', true) // 👈 NOVA LINHA
+      .eq('recebido', true)
       .order('data', { ascending: false });
 
     if (!error && data) {
@@ -63,21 +62,21 @@ export default function Receitas() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen p-4">
         <i className="ri-loader-4-line text-4xl text-blue-600 animate-spin"></i>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 lg:space-y-6">
+    <div className="p-4 sm:p-8 pb-32 lg:pb-8 space-y-4 lg:space-y-6">
       <TrialBanner />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-xl lg:text-3xl font-bold text-gray-900">💵 Dinheiro que Entrou</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">💵 Dinheiro que Entrou</h1>
         <button
           onClick={() => navigate('/nova-receita')}
-          className="px-4 lg:px-6 py-2 lg:py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-4 lg:px-6 py-2.5 lg:py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
         >
           <i className="ri-add-line text-lg lg:text-xl"></i>
           <span className="hidden sm:inline">Recebi Dinheiro</span>
@@ -88,13 +87,13 @@ export default function Receitas() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6 border border-gray-100">
           <h3 className="text-xs lg:text-sm font-medium text-gray-600 mb-2">Total Recebido</h3>
-          <p className="text-lg lg:text-2xl font-bold text-green-600">
+          <p className="text-xl lg:text-2xl font-bold text-green-600">
             R$ {totalReceitas.toFixed(2).replace('.', ',')}
           </p>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6 border border-gray-100">
           <h3 className="text-xs lg:text-sm font-medium text-gray-600 mb-2">Total de Registros</h3>
-          <p className="text-lg lg:text-2xl font-bold text-blue-600">
+          <p className="text-xl lg:text-2xl font-bold text-blue-600">
             {receitasFiltradas.length}
           </p>
         </div>
@@ -139,15 +138,15 @@ export default function Receitas() {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-full">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase">Data</th>
-                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase min-w-32">Descrição</th>
-                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase">Categoria</th>
-                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase">Valor</th>
-                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase">Recebido em</th>
-                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase">Ações</th>
+                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Data</th>
+                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase">Descrição</th>
+                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Categoria</th>
+                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Valor</th>
+                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Recebido em</th>
+                <th className="px-3 lg:px-6 py-3 lg:py-4 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -158,7 +157,9 @@ export default function Receitas() {
                       {format(new Date(receita.data), 'dd/MM/yyyy')}
                     </td>
                     <td className="px-3 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-900">
-                      <div className="max-w-32 lg:max-w-none truncate">{receita.descricao}</div>
+                      <div className="max-w-[200px] truncate" title={receita.descricao}>
+                        {receita.descricao}
+                      </div>
                     </td>
                     <td className="px-3 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm text-gray-600 whitespace-nowrap">{receita.categoria}</td>
                     <td className="px-3 lg:px-6 py-3 lg:py-4 text-xs lg:text-sm font-semibold text-green-600 whitespace-nowrap">
@@ -168,15 +169,13 @@ export default function Receitas() {
                       {receita.data_recebimento ? format(new Date(receita.data_recebimento), 'dd/MM/yyyy') : '-'}
                     </td>
                     <td className="px-3 lg:px-6 py-3 lg:py-4">
-                      <div className="flex items-center gap-1 lg:gap-2">
-                        <button
-                          onClick={() => handleDelete(receita.id)}
-                          className="p-1.5 lg:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                          title="Excluir"
-                        >
-                          <i className="ri-delete-bin-line text-sm lg:text-lg w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center"></i>
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleDelete(receita.id)}
+                        className="p-1.5 lg:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        title="Excluir"
+                      >
+                        <i className="ri-delete-bin-line text-base lg:text-lg"></i>
+                      </button>
                     </td>
                   </tr>
                 ))
