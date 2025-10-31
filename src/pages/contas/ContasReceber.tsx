@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase, ContaReceber } from '../../lib/supabase';
@@ -78,7 +77,10 @@ export default function ContasReceber() {
   const handleMarcarRecebido = async (id: string) => {
     const { error } = await supabase
       .from('contas_receber')
-      .update({ recebido: true })
+      .update({ 
+        recebido: true,
+        data_recebimento: new Date().toISOString().split('T')[0]
+      })
       .eq('id', id);
 
     if (!error) {
@@ -152,13 +154,13 @@ export default function ContasReceber() {
       <TrialBanner />
 
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Contas a Receber</h1>
+        <h1 className="text-3xl font-bold text-gray-900">📅 Vou Receber</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
+          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
         >
           <i className="ri-add-line text-xl"></i>
-          Nova Conta
+          Vou Receber
         </button>
       </div>
 
@@ -198,7 +200,7 @@ export default function ContasReceber() {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">Total a Receber</p>
-            <p className="text-2xl font-bold text-green-600">
+            <p className="text-2xl font-bold text-blue-600">
               R$ {totalAReceber.toFixed(2).replace('.', ',')}
             </p>
           </div>
@@ -222,7 +224,7 @@ export default function ContasReceber() {
               </div>
 
               <div className="mb-4">
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-blue-600">
                   R$ {Number(conta.valor).toFixed(2).replace('.', ',')}
                 </p>
               </div>
@@ -239,7 +241,7 @@ export default function ContasReceber() {
 
               <button
                 onClick={() => handleMarcarRecebido(conta.id)}
-                className="w-full py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap"
+                className="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap"
               >
                 Marcar como Recebido
               </button>
@@ -256,7 +258,7 @@ export default function ContasReceber() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Nova Conta a Receber</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">📅 Vou Receber</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
@@ -264,9 +266,10 @@ export default function ContasReceber() {
                   type="text"
                   value={formData.descricao}
                   onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   required
                   disabled={saving}
+                  placeholder="Ex: Progressiva - Cliente Paula"
                 />
               </div>
               <div>
@@ -277,7 +280,7 @@ export default function ContasReceber() {
                   min="0.01"
                   value={formData.valor}
                   onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   required
                   disabled={saving}
                 />
@@ -288,7 +291,7 @@ export default function ContasReceber() {
                   type="date"
                   value={formData.vencimento}
                   onChange={(e) => setFormData({ ...formData, vencimento: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   required
                   disabled={saving}
                 />
@@ -297,7 +300,7 @@ export default function ContasReceber() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Salvando...' : 'Salvar'}
                 </button>
