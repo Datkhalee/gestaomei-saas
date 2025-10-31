@@ -292,7 +292,7 @@ export default function CalculadoraDAS() {
             Para gerar e pagar seu DAS com os valores oficiais atualizados:
           </p>
           <div className="flex flex-wrap gap-3">
-            
+            <a
               href="https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgmei.app/Identificacao"
               target="_blank"
               rel="noopener noreferrer"
@@ -302,7 +302,7 @@ export default function CalculadoraDAS() {
               <span>Portal do Simples Nacional</span>
             </a>
             
-            
+            <a
               href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor"
               target="_blank"
               rel="noopener noreferrer"
