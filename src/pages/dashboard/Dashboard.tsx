@@ -17,10 +17,6 @@ interface DashboardData {
   totalReceitas: number;
   totalDespesas: number;
   saldo: number;
-  receitasRecebidas: number;
-  receitasPendentes: number;
-  despesasPagas: number;
-  despesasPendentes: number;
   contasPagar: number;
   contasReceber: number;
 }
@@ -50,10 +46,6 @@ export default function Dashboard() {
     totalReceitas: 0,
     totalDespesas: 0,
     saldo: 0,
-    receitasRecebidas: 0,
-    receitasPendentes: 0,
-    despesasPagas: 0,
-    despesasPendentes: 0,
     contasPagar: 0,
     contasReceber: 0,
   });
@@ -77,7 +69,6 @@ export default function Dashboard() {
 
   const LIMITE_ANUAL_MEI = 81000;
 
-  // Toggle Dark Mode
   const toggleDarkMode = () => {
     const newMode = !darkMode;
     setDarkMode(newMode);
@@ -115,10 +106,12 @@ export default function Dashboard() {
       const mesAnterior = startOfMonth(subMonths(hoje, 1));
       const fimMesAnterior = endOfMonth(subMonths(hoje, 1));
 
+      // ✅ APENAS RECEITAS JÁ RECEBIDAS
       const { data: receitasMesAtual } = await supabase
         .from('receitas')
         .select('valor')
         .eq('user_id', user.id)
+        .eq('recebido', true)
         .gte('data', format(mesAtual, 'yyyy-MM-dd'))
         .lte('data', format(fimMesAtual, 'yyyy-MM-dd'));
 
@@ -126,13 +119,16 @@ export default function Dashboard() {
         .from('receitas')
         .select('valor')
         .eq('user_id', user.id)
+        .eq('recebido', true)
         .gte('data', format(mesAnterior, 'yyyy-MM-dd'))
         .lte('data', format(fimMesAnterior, 'yyyy-MM-dd'));
 
+      // ✅ APENAS DESPESAS JÁ PAGAS
       const { data: despesasMesAtual } = await supabase
         .from('despesas')
         .select('valor')
         .eq('user_id', user.id)
+        .eq('pago', true)
         .gte('data', format(mesAtual, 'yyyy-MM-dd'))
         .lte('data', format(fimMesAtual, 'yyyy-MM-dd'));
 
@@ -140,6 +136,7 @@ export default function Dashboard() {
         .from('despesas')
         .select('valor')
         .eq('user_id', user.id)
+        .eq('pago', true)
         .gte('data', format(mesAnterior, 'yyyy-MM-dd'))
         .lte('data', format(fimMesAnterior, 'yyyy-MM-dd'));
 
@@ -147,10 +144,12 @@ export default function Dashboard() {
       const inicioAno = new Date(anoAtual, 0, 1);
       const fimAno = new Date(anoAtual, 11, 31);
 
+      // ✅ FATURAMENTO = APENAS RECEBIDAS
       const { data: receitasAno } = await supabase
         .from('receitas')
         .select('valor')
         .eq('user_id', user.id)
+        .eq('recebido', true)
         .gte('data', format(inicioAno, 'yyyy-MM-dd'))
         .lte('data', format(fimAno, 'yyyy-MM-dd'));
 
@@ -202,17 +201,21 @@ export default function Dashboard() {
     const endDate = endOfMonth(currentMonth);
 
     try {
+      // ✅ APENAS RECEITAS RECEBIDAS
       const { data: receitas } = await supabase
         .from('receitas')
         .select('*')
         .eq('user_id', user.id)
+        .eq('recebido', true)
         .gte('data', format(startDate, 'yyyy-MM-dd'))
         .lte('data', format(endDate, 'yyyy-MM-dd'));
 
+      // ✅ APENAS DESPESAS PAGAS
       const { data: despesas } = await supabase
         .from('despesas')
         .select('*')
         .eq('user_id', user.id)
+        .eq('pago', true)
         .gte('data', format(startDate, 'yyyy-MM-dd'))
         .lte('data', format(endDate, 'yyyy-MM-dd'));
 
@@ -230,19 +233,11 @@ export default function Dashboard() {
 
       const totalReceitas = receitas?.reduce((acc, item) => acc + item.valor, 0) || 0;
       const totalDespesas = despesas?.reduce((acc, item) => acc + item.valor, 0) || 0;
-      const receitasRecebidas = receitas?.filter(r => r.recebido).reduce((acc, item) => acc + item.valor, 0) || 0;
-      const receitasPendentes = receitas?.filter(r => !r.recebido).reduce((acc, item) => acc + item.valor, 0) || 0;
-      const despesasPagas = despesas?.filter(d => d.pago).reduce((acc, item) => acc + item.valor, 0) || 0;
-      const despesasPendentes = despesas?.filter(d => !d.pago).reduce((acc, item) => acc + item.valor, 0) || 0;
 
       setData({
         totalReceitas,
         totalDespesas,
         saldo: totalReceitas - totalDespesas,
-        receitasRecebidas,
-        receitasPendentes,
-        despesasPagas,
-        despesasPendentes,
         contasPagar: contasPagar?.reduce((acc, item) => acc + item.valor, 0) || 0,
         contasReceber: contasReceber?.reduce((acc, item) => acc + item.valor, 0) || 0,
       });
@@ -260,10 +255,12 @@ export default function Dashboard() {
     const startYear = new Date(currentYear, 0, 1);
     const endYear = new Date(currentYear, 11, 31);
 
+    // ✅ APENAS RECEITAS RECEBIDAS
     const { data: receitas } = await supabase
       .from('receitas')
       .select('valor')
       .eq('user_id', user.id)
+      .eq('recebido', true)
       .gte('data', format(startYear, 'yyyy-MM-dd'))
       .lte('data', format(endYear, 'yyyy-MM-dd'));
 
@@ -315,9 +312,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-8">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
         
-        {/* Status Badge Discreto - Topo */}
         <div className="flex justify-end items-center gap-3 mb-2 sm:mb-3">
-          {/* Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 transition-all duration-200"
@@ -336,7 +331,6 @@ export default function Dashboard() {
             )}
           </button>
 
-          {/* Status Badge */}
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
             user?.status_assinatura === 'trial' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
             user?.status_assinatura === 'ativo' ? 'bg-green-100 text-green-800 border border-green-300' : 
@@ -351,7 +345,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Header Compacto e Recolhível */}
         <div 
           className={`bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 rounded-2xl text-white mb-4 sm:mb-5 shadow-lg transition-all duration-300 overflow-hidden ${
             headerCollapsed ? 'p-3 sm:p-4' : 'p-4 sm:p-5 lg:p-6'
@@ -392,12 +385,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Alertas MEI */}
         <div className="animate-fadeIn">
           <MEIAlerts />
         </div>
 
-        {/* Botões de Ação 2x2 - Desktop/Tablet */}
+        {/* 🔥 BOTÕES COM LABELS MELHORADOS */}
         <div className="hidden md:grid grid-cols-2 xl:grid-cols-4 gap-8 lg:gap-12 mb-5 animate-fadeIn">
           <button
             onClick={() => setShowNovaReceitaModal(true)}
@@ -408,8 +400,8 @@ export default function Dashboard() {
                 <i className="ri-add-circle-line text-2xl text-green-600 group-hover:text-white transition-colors duration-200"></i>
               </div>
               <div className="text-left">
-                <div className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors duration-200">Nova Receita</div>
-                <div className="text-xs text-gray-500">Adicionar entrada</div>
+                <div className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors duration-200">💵 Recebi Dinheiro</div>
+                <div className="text-xs text-gray-500">Dinheiro que entrou</div>
               </div>
             </div>
           </button>
@@ -423,8 +415,8 @@ export default function Dashboard() {
                 <i className="ri-subtract-line text-2xl text-red-600 group-hover:text-white transition-colors duration-200"></i>
               </div>
               <div className="text-left">
-                <div className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors duration-200">Nova Despesa</div>
-                <div className="text-xs text-gray-500">Adicionar saída</div>
+                <div className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors duration-200">💸 Paguei uma Conta</div>
+                <div className="text-xs text-gray-500">Dinheiro que saiu</div>
               </div>
             </div>
           </button>
@@ -438,8 +430,8 @@ export default function Dashboard() {
                 <i className="ri-file-list-line text-2xl text-orange-600 group-hover:text-white transition-colors duration-200"></i>
               </div>
               <div className="text-left">
-                <div className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors duration-200">Conta a Pagar</div>
-                <div className="text-xs text-gray-500">Registrar débito</div>
+                <div className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors duration-200">📋 Tenho que Pagar</div>
+                <div className="text-xs text-gray-500">Débito futuro</div>
               </div>
             </div>
           </button>
@@ -453,22 +445,21 @@ export default function Dashboard() {
                 <i className="ri-file-text-line text-2xl text-blue-600 group-hover:text-white transition-colors duration-200"></i>
               </div>
               <div className="text-left">
-                <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">Conta a Receber</div>
-                <div className="text-xs text-gray-500">Registrar crédito</div>
+                <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">📅 Vou Receber</div>
+                <div className="text-xs text-gray-500">Crédito futuro</div>
               </div>
             </div>
           </button>
         </div>
 
-        {/* Cards de Indicadores com Tendências */}
+        {/* Cards (resto do código igual...) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-5 animate-slideUp">
-          {/* Receitas do Mês */}
           <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-4 sm:p-5 group hover:scale-105">
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
                   <i className="ri-funds-line"></i>
-                  Receitas do Mês
+                  💰 Dinheiro que Entrou
                 </p>
                 <p className="text-2xl sm:text-3xl font-bold text-green-600 leading-tight mb-2">
                   {formatCurrency(resumo.receitasMes)}
@@ -491,13 +482,12 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Despesas do Mês */}
           <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-4 sm:p-5 group hover:scale-105">
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 flex items-center gap-1">
                   <i className="ri-money-dollar-circle-line"></i>
-                  Despesas do Mês
+                  💸 Dinheiro que Saiu
                 </p>
                 <p className="text-2xl sm:text-3xl font-bold text-red-600 leading-tight mb-2">
                   {formatCurrency(resumo.despesasMes)}
@@ -520,7 +510,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Lucro do Mês - DESTAQUE */}
           <div className={`rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-5 group hover:scale-105 border-2 ${
             resumo.lucroMes >= 0 
               ? 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300' 
@@ -553,7 +542,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Faturamento Anual */}
           <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 p-4 sm:p-5 group hover:scale-105">
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
@@ -575,7 +563,6 @@ export default function Dashboard() {
                 <i className="ri-bar-chart-line text-2xl text-purple-600"></i>
               </div>
             </div>
-            {/* Barra de progresso */}
             <div className="mt-3">
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
@@ -587,14 +574,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Gráfico Financeiro */}
         <div className="mb-4 sm:mb-5 animate-slideUp" style={{ animationDelay: '100ms' }}>
           <FinancialChart />
         </div>
 
-        {/* Contas Próximas - Apenas 2 itens + Ver todas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5 animate-slideUp" style={{ animationDelay: '200ms' }}>
-          {/* Contas a Pagar */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <i className="ri-file-list-3-line text-xl text-red-600"></i>
@@ -667,7 +651,6 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Contas a Receber */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <i className="ri-file-text-line text-xl text-green-600"></i>
@@ -741,7 +724,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Dica do Dia */}
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-5 border border-blue-200 animate-slideUp" style={{ animationDelay: '300ms' }}>
           <div className="flex items-start gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -750,15 +732,14 @@ export default function Dashboard() {
             <div className="flex-1">
               <h4 className="font-semibold text-blue-900 mb-1 sm:mb-2 text-sm sm:text-base">💡 Dica do Dia</h4>
               <p className="text-blue-800 leading-relaxed text-xs sm:text-sm">
-                Mantenha sempre suas receitas e despesas atualizadas para ter uma visão real da saúde 
-                financeira do seu MEI. Use a calculadora DAS para planejar seus impostos!
+                Registre apenas o dinheiro que JÁ entrou ou saiu do seu caixa. Use "Contas a Receber/Pagar" para o que ainda vai acontecer!
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Barra Flutuante Mobile - FIXED BOTTOM */}
+      {/* 🔥 MOBILE BAR COM LABELS MELHORADOS */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl z-50 animate-slideUp">
         <div className="grid grid-cols-4 gap-px bg-gray-200">
           <button
@@ -768,7 +749,7 @@ export default function Dashboard() {
             <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
               <i className="ri-add-circle-line text-xl text-green-600"></i>
             </div>
-            <span className="text-xs font-medium text-gray-700">Receita</span>
+            <span className="text-xs font-medium text-gray-700">Recebi</span>
           </button>
 
           <button
@@ -778,7 +759,7 @@ export default function Dashboard() {
             <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
               <i className="ri-subtract-line text-xl text-red-600"></i>
             </div>
-            <span className="text-xs font-medium text-gray-700">Despesa</span>
+            <span className="text-xs font-medium text-gray-700">Paguei</span>
           </button>
 
           <button
@@ -788,7 +769,7 @@ export default function Dashboard() {
             <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
               <i className="ri-file-list-line text-xl text-orange-600"></i>
             </div>
-            <span className="text-xs font-medium text-gray-700">Pagar</span>
+            <span className="text-xs font-medium text-gray-700">A Pagar</span>
           </button>
 
           <button
@@ -798,12 +779,11 @@ export default function Dashboard() {
             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
               <i className="ri-file-text-line text-xl text-blue-600"></i>
             </div>
-            <span className="text-xs font-medium text-gray-700">Receber</span>
+            <span className="text-xs font-medium text-gray-700">A Receber</span>
           </button>
         </div>
       </div>
 
-      {/* Modals */}
       <NovaReceitaModal
         isOpen={showNovaReceitaModal}
         onClose={() => setShowNovaReceitaModal(false)}
@@ -862,7 +842,6 @@ export default function Dashboard() {
         }
       `}</style>
 
-      {/* Rodapé */}
       <footer className="mt-8 pt-6 border-t border-gray-200 text-center">
         <p className="text-sm text-gray-600">
           © {new Date().getFullYear()} SaaS desenvolvido por{' '}
@@ -877,7 +856,6 @@ export default function Dashboard() {
         </p>
       </footer>
 
-      {/* Caixa de Sugestões */}
       <SuggestionBox />
     </div>
   );
