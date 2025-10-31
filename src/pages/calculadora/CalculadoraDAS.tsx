@@ -314,7 +314,6 @@ export default function CalculadoraDAS() {
             </a>
           </div>
         </div>
-      </div>
 
       {/* ⚠️ Aviso Legal (discreto) */}
       <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
