@@ -33,12 +33,11 @@ export default function CalculadoraDAS() {
     const endYear = endOfYear(new Date());
 
     try {
-      // ✅ FILTRAR APENAS RECEITAS RECEBIDAS
       const { data: receitas } = await supabase
         .from('receitas')
         .select('valor')
         .eq('user_id', user.id)
-        .eq('recebido', true) // 👈 NOVA LINHA
+        .eq('recebido', true)
         .gte('data', format(startYear, 'yyyy-MM-dd'))
         .lte('data', format(endYear, 'yyyy-MM-dd'));
 
@@ -314,8 +313,9 @@ export default function CalculadoraDAS() {
             </a>
           </div>
         </div>
+      </div>
 
-      {/* ⚠️ Aviso Legal (discreto) */}
+      {/* ⚠️ Aviso Legal */}
       <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
         <p className="text-xs text-yellow-800 leading-relaxed">
           <strong>⚖️ Aviso:</strong> Esta calculadora é uma ferramenta educativa com valores de referência. 
