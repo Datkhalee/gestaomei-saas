@@ -400,9 +400,24 @@ export default function MeuPlano() {
                 </div>
               </div>
 
-              <p className="text-blue-100">
+              <p className="text-blue-100 mb-8">
                 Menos de <strong className="text-yellow-300">R$ 1 por dia</strong> para nunca mais ter dor de cabeça com finanças
               </p>
+
+              {/* 🎯 CTA #1 - Principal no Header */}
+              <div className="flex justify-center">
+                <a
+                  href="https://pay.cakto.com.br/38pmmdm_618893"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleCheckoutClick}
+                  className="group inline-flex items-center gap-3 px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-gray-900 text-xl font-black rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300"
+                >
+                  <i className="ri-rocket-line text-3xl group-hover:animate-bounce"></i>
+                  QUERO TRANSFORMAR MINHAS FINANÇAS AGORA
+                  <i className="ri-arrow-right-line text-3xl group-hover:translate-x-2 transition-transform"></i>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -442,7 +457,27 @@ export default function MeuPlano() {
               </div>
             </div>
 
-            {/* CTA Principal */}
+            {/* 🎯 CTA #2 - Após Benefícios */}
+            <div className="text-center mb-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8">
+              <p className="text-white text-2xl font-bold mb-6">
+                ✨ Pronto para ter controle total das suas finanças?
+              </p>
+              <a
+                href="https://pay.cakto.com.br/38pmmdm_618893"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleCheckoutClick}
+                className="inline-flex items-center gap-3 px-10 py-5 bg-yellow-400 hover:bg-yellow-300 text-gray-900 text-xl font-black rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300"
+              >
+                <i className="ri-flashlight-fill text-2xl"></i>
+                SIM! QUERO COMEÇAR AGORA POR R$ 27/MÊS
+              </a>
+              <p className="text-white/80 text-sm mt-4">
+                ⚡ Acesso imediato • Cancele quando quiser
+              </p>
+            </div>
+
+            {/* CTA Principal (existente) */}
             <div className="mb-12">
               {getActionButton()}
             </div>
@@ -587,6 +622,33 @@ export default function MeuPlano() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* 🎯 CTA #3 - Após Depoimentos */}
+            <div className="bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 rounded-3xl p-10 text-center text-white mb-12 shadow-2xl">
+              <div className="max-w-2xl mx-auto">
+                <h4 className="text-3xl font-black mb-3">
+                  🎉 Junte-se a +2.000 MEIs de sucesso!
+                </h4>
+                <p className="text-xl text-white/90 mb-6">
+                  Sua história de sucesso financeiro começa <strong className="text-yellow-300">HOJE</strong>
+                </p>
+                <a
+                  href="https://pay.cakto.com.br/38pmmdm_618893"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleCheckoutClick}
+                  className="inline-flex items-center gap-3 px-10 py-5 bg-white hover:bg-gray-100 text-green-700 text-xl font-black rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300"
+                >
+                  <i className="ri-check-double-line text-3xl"></i>
+                  GARANTIR MINHA VAGA POR R$ 27/MÊS
+                  <i className="ri-arrow-right-line text-3xl"></i>
+                </a>
+                <p className="text-white/80 text-sm mt-4 flex items-center justify-center gap-2">
+                  <i className="ri-shield-check-line"></i>
+                  Garantia de 7 dias • Pagamento 100% seguro
+                </p>
               </div>
             </div>
 
