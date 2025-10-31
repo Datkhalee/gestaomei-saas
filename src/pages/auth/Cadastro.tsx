@@ -39,7 +39,7 @@ export default function Cadastro() {
       await signUp(nome, email, senha);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Erro ao criar conta');
+      setError(err.message || 'Erro ao criar conta. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -53,6 +53,9 @@ export default function Cadastro() {
             src="/logo-finance.png" 
             alt="FinanceMEI" 
             className="h-12 mx-auto mb-4"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
           />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Criar Conta Grátis
@@ -122,6 +125,9 @@ export default function Cadastro() {
                 {showPassword ? '👁️' : '👁️‍🗨️'}
               </button>
             </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Use pelo menos 8 caracteres
+            </p>
           </div>
 
           <div>
@@ -152,9 +158,16 @@ export default function Cadastro() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
-            {loading ? 'Criando conta...' : 'Criar Conta Grátis'}
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Criando conta...
+              </div>
+            ) : (
+              'Criar Conta Grátis'
+            )}
           </button>
         </form>
 
@@ -164,6 +177,12 @@ export default function Cadastro() {
             <Link to="/login" className="text-blue-600 font-semibold hover:text-blue-700">
               Entrar
             </Link>
+          </p>
+        </div>
+
+        <div className="mt-4 text-center">
+          <p className="text-xs text-gray-500">
+            ✅ Sem cartão de crédito · ✅ Cancele quando quiser
           </p>
         </div>
       </div>
