@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -16,7 +15,6 @@ export default function NovaContaReceberModal({ isOpen, onClose, onSuccess }: No
     descricao: '',
     valor: '',
     vencimento: '',
-    cliente: '',
     observacoes: ''
   });
 
@@ -33,7 +31,7 @@ export default function NovaContaReceberModal({ isOpen, onClose, onSuccess }: No
           descricao: formData.descricao,
           valor: parseFloat(formData.valor),
           vencimento: formData.vencimento,
-          recebido: false
+          recebido: false // ✅ SEMPRE FALSE - ainda não recebeu
         });
 
       if (error) throw error;
@@ -43,7 +41,6 @@ export default function NovaContaReceberModal({ isOpen, onClose, onSuccess }: No
         descricao: '',
         valor: '',
         vencimento: '',
-        cliente: '',
         observacoes: ''
       });
 
@@ -64,13 +61,20 @@ export default function NovaContaReceberModal({ isOpen, onClose, onSuccess }: No
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Nova Conta a Receber</h2>
+            <h2 className="text-xl font-bold text-gray-900">📅 Vou Receber</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer whitespace-nowrap"
             >
               <i className="ri-close-line text-xl"></i>
             </button>
+          </div>
+
+          {/* ✅ INFO BOX */}
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>📌 Use para registrar serviços feitos que você ainda VAI receber.</strong>
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -83,14 +87,14 @@ export default function NovaContaReceberModal({ isOpen, onClose, onSuccess }: No
                 required
                 value={formData.descricao}
                 onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Ex: Venda de produto/serviço"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Ex: Progressiva - Cliente Paula"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Valor *
+                Valor (R$) *
               </label>
               <input
                 type="number"
@@ -98,35 +102,23 @@ export default function NovaContaReceberModal({ isOpen, onClose, onSuccess }: No
                 required
                 value={formData.valor}
                 onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0,00"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vencimento *
+                Data de Vencimento *
               </label>
               <input
                 type="date"
                 required
                 value={formData.vencimento}
                 onChange={(e) => setFormData({ ...formData, vencimento: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cliente
-              </label>
-              <input
-                type="text"
-                value={formData.cliente}
-                onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Nome do cliente"
-              />
+              <p className="text-xs text-gray-500 mt-1">Data prevista para receber o pagamento</p>
             </div>
 
             <div>
@@ -137,8 +129,8 @@ export default function NovaContaReceberModal({ isOpen, onClose, onSuccess }: No
                 value={formData.observacoes}
                 onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-                placeholder="Informações adicionais..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                placeholder="Ex: Cliente agendou para próxima semana"
               />
             </div>
 
@@ -153,9 +145,9 @@ export default function NovaContaReceberModal({ isOpen, onClose, onSuccess }: No
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
               >
-                {loading ? 'Salvando...' : 'Salvar Conta'}
+                {loading ? 'Salvando...' : 'Salvar'}
               </button>
             </div>
           </form>
