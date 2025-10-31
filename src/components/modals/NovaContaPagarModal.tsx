@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -17,7 +16,6 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
     valor: '',
     vencimento: '',
     categoria: '',
-    fornecedor: '',
     observacoes: ''
   });
 
@@ -32,6 +30,7 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
     'Fornecedores',
     'Equipamentos',
     'Marketing',
+    'Contas Fixas',
     'Outros'
   ];
 
@@ -49,7 +48,7 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
           valor: parseFloat(formData.valor),
           vencimento: formData.vencimento,
           categoria: formData.categoria,
-          pago: false
+          pago: false // ✅ SEMPRE FALSE - ainda não pagou
         });
 
       if (error) throw error;
@@ -60,7 +59,6 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
         valor: '',
         vencimento: '',
         categoria: '',
-        fornecedor: '',
         observacoes: ''
       });
 
@@ -81,13 +79,20 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Nova Conta a Pagar</h2>
+            <h2 className="text-xl font-bold text-gray-900">📋 Tenho que Pagar</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer whitespace-nowrap"
             >
               <i className="ri-close-line text-xl"></i>
             </button>
+          </div>
+
+          {/* ✅ INFO BOX */}
+          <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <p className="text-sm text-orange-800">
+              <strong>📌 Use para registrar contas que você ainda VAI pagar no futuro.</strong>
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,14 +105,14 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
                 required
                 value={formData.descricao}
                 onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Ex: Aluguel do escritório"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Ex: Aluguel do salão"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Valor *
+                Valor (R$) *
               </label>
               <input
                 type="number"
@@ -115,21 +120,21 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
                 required
                 value={formData.valor}
                 onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 placeholder="0,00"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vencimento *
+                Data de Vencimento *
               </label>
               <input
                 type="date"
                 required
                 value={formData.vencimento}
                 onChange={(e) => setFormData({ ...formData, vencimento: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
 
@@ -141,7 +146,7 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
                 required
                 value={formData.categoria}
                 onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent pr-8"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent pr-8"
               >
                 <option value="">Selecione uma categoria</option>
                 {categorias.map((categoria) => (
@@ -154,27 +159,14 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fornecedor/Credor
-              </label>
-              <input
-                type="text"
-                value={formData.fornecedor}
-                onChange={(e) => setFormData({ ...formData, fornecedor: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Nome do fornecedor ou credor"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Observações
               </label>
               <textarea
                 value={formData.observacoes}
                 onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                placeholder="Informações adicionais..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                placeholder="Ex: Fornecedor XYZ, boleto vence dia 05"
               />
             </div>
 
@@ -189,9 +181,9 @@ export default function NovaContaPagarModal({ isOpen, onClose, onSuccess }: Nova
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
               >
-                {loading ? 'Salvando...' : 'Salvar Conta'}
+                {loading ? 'Salvando...' : 'Salvar'}
               </button>
             </div>
           </form>
